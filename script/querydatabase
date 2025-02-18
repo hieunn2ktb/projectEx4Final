@@ -1,0 +1,57 @@
+SELECT * FROM properties;
+SELECT * FROM users;
+SELECT * FROM property_images;
+SELECT pi.image_url ,p.title,p.price,p.description,p.address,p.property_type,p.age,u.full_name,u.phone
+	FROM property_images pi
+    Join properties p
+    On pi.id = p.id
+    Join users u
+    ON p.created_by = u.id Limit 5;
+SELECT DISTINCT pi.image_url,
+                p.title,
+                p.price,
+                p.description,
+                p.address,
+                p.property_type,
+                p.age,
+                u.full_name,
+                u.phone
+FROM properties p
+LEFT JOIN property_images pi ON pi.property_id = p.id
+JOIN users u ON p.created_by = u.id
+WHERE p.price BETWEEN 100000 AND 1000000
+      AND p.property_type = 'Căn hộ'
+      AND p.address = 'Hà Nội'
+LIMIT 10000;
+
+SELECT p.title,
+       MAX(pi.image_url) AS image_url,
+       p.price,
+       p.description,
+       p.address,
+       p.property_type,
+       p.age,
+       u.full_name,
+       u.phone
+FROM properties p
+LEFT JOIN property_images pi ON pi.property_id = p.id
+JOIN users u ON p.created_by = u.id
+WHERE p.price BETWEEN 100000 AND 1000000
+      AND p.property_type = 'Căn hộ'
+      AND p.address = 'Hà Nội'
+GROUP BY p.title, p.price, p.description, p.address, p.property_type, p.age, u.full_name, u.phone
+LIMIT 10000;
+
+
+
+
+
+-- private String imageUrl;
+--    private String title;
+--    private double price;
+-- private String description;
+--    private String address;
+--    private String propertyType;
+--    private int acreage;
+ --   private String fullName;
+ --   private String phone;

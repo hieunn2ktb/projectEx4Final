@@ -1,0 +1,45 @@
+
+-- Thêm dữ liệu vào bảng user_roles
+INSERT INTO user_roles (user_id, role_id) VALUES
+(1, 1), -- Nguyễn Văn A là Admin
+(2, 2), -- Trần Thị B là Nhân viên
+(3, 3); -- Lê Quốc C là Khách hàng
+
+-- Thêm dữ liệu vào bảng properties
+INSERT INTO properties (title, description, price, address, property_type, created_by, age) VALUES
+('Căn hộ chung cư cao cấp', 'Căn hộ đẹp, nội thất đầy đủ', 2500000000, 'Hà Nội', 'Căn hộ', 1, 200),
+('Nhà phố Quận 7', 'Nhà mặt tiền, thích hợp kinh doanh', 5500000000, 'TP. Hồ Chí Minh', 'Nhà riêng', 2, 300),
+('Đất nền khu dân cư mới', 'Khu vực phát triển, thích hợp đầu tư', 1200000000, 'Bình Dương', 'Đất nền', 1, 400);
+
+-- Thêm dữ liệu vào bảng property_images
+INSERT INTO property_images (property_id, image_url) VALUES
+(1, 'property1.jpg'),
+(1, 'property1_2.jpg'),
+(2, 'property2.jpg'),
+(3, 'property3.jpg');
+
+-- Thêm dữ liệu vào bảng transaction_status
+INSERT INTO transaction_status (name) VALUES
+('Đang xử lý'),
+('Đã hoàn thành');
+
+-- Thêm dữ liệu vào bảng transactions
+INSERT INTO transactions (property_id, buyer_id, seller_id, transaction_type, status_id) VALUES
+(1, 3, 1, 'Mua', 2),
+(2, 3, 2, 'Đặt cọc', 1);
+
+-- Thêm dữ liệu vào bảng customer_activity
+INSERT INTO customer_activity (customer_id, property_id, viewed_at) VALUES
+(3, 1, NOW()),
+(3, 2, NOW());
+
+-- Thêm dữ liệu vào bảng reports
+INSERT INTO reports (report_type, month, year, total_transactions, total_revenue) VALUES
+('Số lượng giao dịch', 2, 2025, 5, 0),
+('Doanh thu', 2, 2025, 0, 5000000000);
+
+-- Thêm dữ liệu vào bảng email_notifications
+INSERT INTO email_notifications (transaction_id, recipient_email, subject, body) VALUES
+(1, 'lequocc@example.com', 'Xác nhận giao dịch', 'Giao dịch của bạn đã hoàn thành thành công.'),
+(2, 'lequocc@example.com', 'Thông báo đặt cọc', 'Bạn đã đặt cọc thành công cho bất động sản.');
+

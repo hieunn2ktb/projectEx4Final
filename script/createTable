@@ -1,0 +1,108 @@
+CREATE DATABASE real_estate_management;
+USE real_estate_management;
+
+
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    full_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    phone VARCHAR(20),
+    address TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Bảng lưu vai trò (Admin, Nhân viên, Khách hàng)
+CREATE TABLE roles (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name ENUM('Admin', 'Employee', 'Customer') NOT NULL
+);
+
+-- Bảng liên kết người dùng với vai trò
+CREATE TABLE user_roles (
+    user_id INT,
+    role_id INT,
+    PRIMARY KEY (user_id, role_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+);
+
+-- Bảng lưu thông tin Bất động sản
+CREATE TABLE properties (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(15,2) NOT NULL,
+    address TEXT NOT NULL,
+    property_type ENUM('Căn hộ', 'Nhà riêng', 'Đất nền', 'Khác') NOT NULL,
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+);
+ALTER TABLE properties
+ADD COLUMN age INT;
+
+-- Bảng lưu hình ảnh của BĐS
+CREATE TABLE property_images (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    property_id INT,
+    image_url VARCHAR(255) NOT NULL,
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE
+);
+
+-- Bảng lưu thông tin giao dịch
+CREATE TABLE transactions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    property_id INT NOT NULL,
+    buyer_id INT NOT NULL,
+    seller_id INT NOT NULL,
+    transaction_type ENUM('Mua', 'Đặt cọc', 'Bán') NOT NULL,
+    status_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (property_id)
+        REFERENCES properties (id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (buyer_id)
+        REFERENCES users (id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (seller_id)
+        REFERENCES users (id)
+        ON DELETE CASCADE
+);
+
+-- Bảng lưu trạng thái giao dịch
+CREATE TABLE transaction_status (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name ENUM('Đang xử lý', 'Đã hoàn thành') NOT NULL
+);
+
+-- Bảng lưu lịch sử xem BĐS của khách hàng
+CREATE TABLE customer_activity (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT NOT NULL,
+    property_id INT NOT NULL,
+    viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE
+);
+
+-- Bảng lưu báo cáo giao dịch
+CREATE TABLE reports (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    report_type ENUM('Số lượng giao dịch', 'Doanh thu') NOT NULL,
+    month INT NOT NULL,
+    year INT NOT NULL,
+    total_transactions INT DEFAULT 0,
+    total_revenue DECIMAL(15,2) DEFAULT 0.00,created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Bảng lưu thông tin email thông báo
+CREATE TABLE email_notifications (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    transaction_id INT NOT NULL,
+    recipient_email VARCHAR(255) NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    body TEXT NOT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
+);
