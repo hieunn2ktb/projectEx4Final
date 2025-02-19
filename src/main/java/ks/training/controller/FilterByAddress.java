@@ -27,23 +27,33 @@ public class FilterByAddress extends HttpServlet {
         // Hiển thị trang tìm kiếm
         request.getRequestDispatcher("property-list.jsp").forward(request, response);
     }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Lấy dữ liệu từ form
+        // Lấy dữ liệu từ form và các tham số phân trang
         String minPrice = request.getParameter("min-price");
         String maxPrice = request.getParameter("max-price");
         String propertyType = request.getParameter("property-type");
         String address = request.getParameter("address");
 
-        List<PropertyDto> filteredProperties = null;
-        try {
-            filteredProperties = filterService.list(minPrice, maxPrice, propertyType, address);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        int currentPage = 1;
+        int recordsPerPage = 10; // Số lượng bản ghi mỗi trang
+
+        // Lấy tham số page từ request (nếu có)
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && !pageParam.isEmpty()) {
+            currentPage = Integer.parseInt(pageParam);
         }
 
-        request.setAttribute("properties", filteredProperties);
-        request.getRequestDispatcher("property-list.jsp").forward(request, response);
+        List<PropertyDto> filteredProperties = null;
+        try {
+            filteredProperties = filterService.list(minPrice, maxPrice, propertyType, address, currentPage, recordsPerPage);
+            request.setAttribute("properties", filteredProperties);
+            request.setAttribute("currentPage", currentPage);
+            request.getRequestDispatcher("property-list.jsp").forward(request, response);
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi khi lọc bất động sản", e);
+        }
     }
 }

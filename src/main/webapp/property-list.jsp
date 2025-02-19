@@ -2,14 +2,13 @@
 <%@ page import="java.util.List, ks.training.dto.PropertyDto" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
+<jsp:useBean id="currentPage" scope="request" type="java.lang.Integer" />
+<jsp:useBean id="totalPages" scope="request" type="java.lang.Integer" />
 
 <%
     List<PropertyDto> properties = (List<PropertyDto>) request.getAttribute("properties");
     if (properties == null) properties = new ArrayList<>();
 %>
-<!DOCTYPE html>
-<html lang="vi">
-
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -43,9 +42,9 @@
         <label for="property-type">Loại hình bất động sản:</label>
         <select id="property-type" name="property-type">
             <option value="" disabled selected>Chọn loại hình bất động sản</option>
-            <option value="can-ho">Căn Hộ</option>
-            <option value="nha-dat">Nhà Đất</option>
-            <option value="biet-thu">Biệt Thự</option>
+            <option value="Căn hộ">Căn Hộ</option>
+            <option value="Nhà riêng">Nhà riêng</option>
+            <option value="Đất nền">Đất nền</option>
         </select>
     </div>
     <div class="filter-Address">
@@ -61,7 +60,6 @@
 </section>
 
 
-<!-- Danh sách bất động sản -->
 <% for (PropertyDto property : properties) { %>
 <section class="property-list">
     <div class="slider-container">
@@ -88,10 +86,12 @@
     </div>
 </section>
 <% } %>
+
+<!-- Phân trang -->
 <div class="pagination">
-    <button id="prevPageBtn" class="pagination-btn">Trước</button>
-    <span class="page-number">Trang 1</span>
-    <button id="nextPageBtn" class="pagination-btn">Tiếp theo</button>
+    <a href="?page=<%= (currentPage > 1) ? currentPage - 1 : 1 %>" class="pagination-btn <%= (currentPage == 1) ? "disabled" : "" %>">Trước</a>
+    <span>Trang <%= currentPage %> / <%= totalPages %></span>
+    <a href="?page=<%= (currentPage < totalPages) ? currentPage + 1 : totalPages %>" class="pagination-btn <%= (currentPage == totalPages) ? "disabled" : "" %>">Tiếp theo</a>
 </div>
 
 <script src="script.js"></script>
