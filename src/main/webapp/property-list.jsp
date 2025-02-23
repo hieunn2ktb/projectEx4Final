@@ -2,12 +2,20 @@
 <%@ page import="java.util.List, ks.training.dto.PropertyDto" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
-<jsp:useBean id="currentPage" scope="request" type="java.lang.Integer" />
-<jsp:useBean id="totalPages" scope="request" type="java.lang.Integer" />
+<%--<jsp:useBean id="currentPage" scope="request" type="java.lang.Integer" />--%>
+<%--<jsp:useBean id="totalPages" scope="request" type="java.lang.Integer" />--%>
 
 <%
     List<PropertyDto> properties = (List<PropertyDto>) request.getAttribute("properties");
     if (properties == null) properties = new ArrayList<>();
+%>
+<%
+    Integer currentPage = (Integer) request.getAttribute("currentPage");
+    Integer totalPages = (Integer) request.getAttribute("totalPages");
+    System.out.println("DEBUG JSP - currentPage: " + currentPage);
+    System.out.println("DEBUG JSP - totalPages: " + totalPages);
+
+
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -32,15 +40,15 @@
 </header>
 
 <!-- Thanh bộ lọc -->
-<form action="${pageContext.request.contextPath}/filter" method="post" class="filter-bar">
+<form action="property-list" method="get" class="filter-bar">
     <div class="filter-price">
         <label for="min-price">Giá trong khoảng:</label>
-        <input type="number" id="min-price" name="min-price" placeholder="Từ (USD)">
-        <input type="number" id="max-price" name="max-price" placeholder="Đến (USD)">
+        <input type="number" id="min-price" name="minPrice" placeholder="Từ (USD)">
+        <input type="number" id="max-price" name="maxPrice" placeholder="Đến (USD)">
     </div>
     <div class="filter-type">
         <label for="property-type">Loại hình bất động sản:</label>
-        <select id="property-type" name="property-type">
+        <select id="property-type" name="searchPropertyType">
             <option value="" disabled selected>Chọn loại hình bất động sản</option>
             <option value="Căn hộ">Căn Hộ</option>
             <option value="Nhà riêng">Nhà riêng</option>
@@ -49,7 +57,7 @@
     </div>
     <div class="filter-Address">
         <label for="address">Địa chỉ:</label>
-        <input type="text" id="address" name="address">
+        <input type="text" id="address" name="searchAddress">
     </div>
     <button class="search-btn">Tìm kiếm</button>
 </form>
@@ -88,11 +96,19 @@
 <% } %>
 
 <!-- Phân trang -->
+
 <div class="pagination">
-    <a href="?page=<%= (currentPage > 1) ? currentPage - 1 : 1 %>" class="pagination-btn <%= (currentPage == 1) ? "disabled" : "" %>">Trước</a>
+    <a href="?page=<%= (currentPage > 1) ? currentPage - 1 : 1 %>"
+       class="pagination-btn <%= (currentPage == 1) ? "disabled" : "" %>">
+        Trước
+    </a>
     <span>Trang <%= currentPage %> / <%= totalPages %></span>
-    <a href="?page=<%= (currentPage < totalPages) ? currentPage + 1 : totalPages %>" class="pagination-btn <%= (currentPage == totalPages) ? "disabled" : "" %>">Tiếp theo</a>
+    <a href="?page=<%= (currentPage < totalPages) ? currentPage + 1 : totalPages %>"
+       class="pagination-btn <%= (currentPage == totalPages) ? "disabled" : "" %>">
+        Tiếp theo
+    </a>
 </div>
+
 
 <script src="script.js"></script>
 </body>
