@@ -1,6 +1,8 @@
 package ks.training.dao;
 
 import ks.training.dto.PropertyDto;
+import ks.training.dto.UserDto;
+import ks.training.entity.User;
 import ks.training.utils.DatabaseConnection;
 
 import java.sql.Connection;
@@ -76,9 +78,11 @@ public class PropertyDao {
         List<Object> params = new ArrayList<>();
 
         if (minPrice != null && maxPrice != null && !minPrice.isEmpty() && !maxPrice.isEmpty()) {
+            int min = Integer.parseInt(minPrice);
+            int max = Integer.parseInt(maxPrice);
             sql += " AND price BETWEEN ? AND ?";
-            params.add(minPrice);
-            params.add(maxPrice);
+            params.add(min);
+            params.add(max);
         }
 
         if (searchAddress != null && !searchAddress.isEmpty()) {
@@ -106,5 +110,24 @@ public class PropertyDao {
         }
         return 0;
     }
+
+    public UserDto validateUser(String username, String password) {
+        String sql = "SELECT u.id , u.email,u.password, r.name FROM users u Join user_roles ur ON u.id = ur.user_id join roles r ON ur.role_id = r.id WHERE u.email = ? AND password = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, username);
+            stmt.setString(2, password);
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new UserDto(rs.getInt("id"), rs.getString("username"), rs.getString("password"), rs.getString("role"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
 }

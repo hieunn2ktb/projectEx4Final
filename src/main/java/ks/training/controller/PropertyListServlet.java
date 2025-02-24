@@ -5,8 +5,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ks.training.dao.PropertyDao;
 import ks.training.dto.PropertyDto;
+import ks.training.service.PropertyService;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -15,15 +15,15 @@ import java.util.List;
 @WebServlet("/property-list")
 public class PropertyListServlet extends HttpServlet {
 
-    private PropertyDao propertyDao;
+    private PropertyService propertyService;
 
     @Override
     public void init() {
-        propertyDao = new PropertyDao();
+         propertyService = new PropertyService();
     }
     List<PropertyDto> properties;
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         int recordsPerPage = 5;
         int currentPage = 1;
@@ -54,7 +54,7 @@ public class PropertyListServlet extends HttpServlet {
 
         try {
             // Đếm số bản ghi sau khi lọc
-            int totalRecords = propertyDao.countProperties(minPrice, maxPrice, searchAddress, searchPropertyType);
+            int totalRecords = propertyService.countProperties(minPrice, maxPrice, searchAddress, searchPropertyType);
             int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
 
             System.out.println("Gia tri totalRecords: " + totalRecords);
@@ -70,8 +70,7 @@ public class PropertyListServlet extends HttpServlet {
 
             System.out.println("Gia tri currentPage: " + currentPage);
             // Lấy danh sách bất động sản theo tìm kiếm và phân trang
-             properties = propertyDao.findPropertiesByPage(minPrice, maxPrice, searchAddress, searchPropertyType, currentPage, recordsPerPage);
-
+             properties = propertyService.findPropertiesByPage(minPrice, maxPrice, searchAddress, searchPropertyType, currentPage, recordsPerPage);
 
             // Gửi dữ liệu đến JSP
             request.setAttribute("properties", properties);
@@ -82,12 +81,11 @@ public class PropertyListServlet extends HttpServlet {
             request.setAttribute("minPrice", minPrice);
             request.setAttribute("maxPrice", maxPrice);
 
-            request.getRequestDispatcher("property-list.jsp").forward(request, response);
+            request.getRequestDispatcher("view/propertyEmployee.jsp").forward(request, response);
             System.out.println("Đã forward đến property-list.jsp");
         } catch (SQLException e) {
             throw new ServletException("Lỗi truy vấn dữ liệu");
         }
     }
-
 
 }

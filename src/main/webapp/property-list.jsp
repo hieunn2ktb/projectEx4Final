@@ -15,6 +15,12 @@
     System.out.println("DEBUG JSP - currentPage: " + currentPage);
     System.out.println("DEBUG JSP - totalPages: " + totalPages);
 
+//    if (currentPage == null) {
+//        currentPage = 1; // Giá trị mặc định
+//    }
+//    if (totalPages == null) {
+//        totalPages = 1; // Giá trị mặc định
+//    }
 
 %>
 <!DOCTYPE html>
@@ -26,6 +32,7 @@
     <title>Trang Bất Động Sản</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="apple-touch-startup-image" href="images/">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 </head>
 
 <body>
@@ -78,32 +85,36 @@
         <button id="nextBtn">❯</button>
     </div>
 
-    <div class="property-info">
+    <div class="property-info" >
         <p class="price"><%= property.getPrice() %> $</p>
         <h2><%= property.getTitle() %></h2>
         <p><%= property.getAddress() %></p>
-        <div class="agent">
+        <div style="background-color: red;">
+            <div><span>Loại bất động sản: <%= property.getPropertyType() %></span></div>
+            <div><span>Diện tích: <%= property.getAcreage() %> m²</span></div>
             <p>Nhân viên tư vấn: </p>
             <p><%= property.getFullName() %></p>
             <p>📞 <%= property.getPhone() %></p>
+
         </div>
-        <div style="background-color: red; position: relative; top: 150px; left: 0px;">
-            <div><span>Loại bất động sản: <%= property.getPropertyType() %></span></div>
-            <div><span>Diện tích: <%= property.getAcreage() %> m²</span></div>
+        <div class="agent">
+            <button type="button" class="btn btn-info">Xem chi tiết</button>
         </div>
+
     </div>
+
 </section>
 <% } %>
 
 <!-- Phân trang -->
 
 <div class="pagination">
-    <a href="?page=<%= (currentPage > 1) ? currentPage - 1 : 1 %>"
+    <a href="property-list?page=<%= (currentPage > 1) ? currentPage - 1 : 1 %>"
        class="pagination-btn <%= (currentPage == 1) ? "disabled" : "" %>">
         Trước
     </a>
     <span>Trang <%= currentPage %> / <%= totalPages %></span>
-    <a href="?page=<%= (currentPage < totalPages) ? currentPage + 1 : totalPages %>"
+    <a href="property-list?page=<%= (currentPage < totalPages) ? currentPage + 1 : totalPages %>"
        class="pagination-btn <%= (currentPage == totalPages) ? "disabled" : "" %>">
         Tiếp theo
     </a>
@@ -111,6 +122,8 @@
 
 
 <script src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
 </body>
 
 </html>
