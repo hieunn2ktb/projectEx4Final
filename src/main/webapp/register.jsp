@@ -5,14 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="css/register.css">
+    <link rel="stylesheet" href="WEB-INF/views/css/register.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 </head>
 
 <body>
 <div class="container">
-    <form action="">
+    <form action="do-Register" method="post">
         <div>
             <h1>Register</h1>
             <p>Please fill in this form to create an account.</p>
@@ -20,7 +20,7 @@
         </div>
         <div class="mb-3">
             <label for="fullName"><b>Full Name</b></label>
-            <input type="text" class="form-control" placeholder="Enter Full Name" name="fullName" id="idFullName"
+            <input type="text" class="form-control" placeholder="Enter Full Name" name="fullName" id="fullName"
                    required>
         </div>
         <div class="mb-3">
@@ -37,14 +37,14 @@
         </div>
         <div class="mb-3">
             <label for="psw"><b>Password</b></label>
-            <input type="password" class="form-control" placeholder="Enter Password" name="psw" id="psw" required>
+            <input type="password" class="form-control" placeholder="Enter Password" name="psw" id="psw" required onkeyup="checkPasswordMatch()">
         </div>
         <div class="mb-3">
-            <label for="psw-repeat"><b>Repeat Password</b></label>
-            <input type="password" class="form-control" placeholder="Repeat Password" name="psw-repeat"
-                   id="psw-repeat" required>
+            <label for="rePassword"><b>Repeat Password</b></label> <span class="error"><span id="msg" class="text-danger"></span></span>
+            <input type="password" class="form-control" placeholder="Repeat Password" name="rePassword"
+                   id="rePassword" required onkeyup="checkPasswordMatch()">
         </div>
-        <input type="submit" class="btn btn-primary form-control">
+        <input type="submit" class="btn btn-primary form-control" value="Register" name="register">
         <div class="container signin">
             <p>Already have an account? <a href="#">Sign in</a>.</p>
         </div>
@@ -57,5 +57,19 @@
         integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
         crossorigin="anonymous"></script>
 </body>
+
+<script>
+    function checkPasswordMatch() {
+        password = document.getElementById("psw").value;
+        rePassword = document.getElementById("rePassword").value;
+        if (password != rePassword) {
+            rePassword = document.getElementById("msg").innerHTML = "Password does not match";
+            return false;
+        }else {
+            rePassword = document.getElementById("msg").innerHTML = "";
+            return true;
+        }
+    }
+</script>
 
 </html>

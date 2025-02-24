@@ -1,129 +1,138 @@
-<%@ page contentType="text/html; charset=UTF-8" language="java" %>
-<%@ page import="java.util.List, ks.training.dto.PropertyDto" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.ArrayList" %>
-<%--<jsp:useBean id="currentPage" scope="request" type="java.lang.Integer" />--%>
-<%--<jsp:useBean id="totalPages" scope="request" type="java.lang.Integer" />--%>
-
-<%
-    List<PropertyDto> properties = (List<PropertyDto>) request.getAttribute("properties");
-    if (properties == null) properties = new ArrayList<>();
-%>
-<%
-    Integer currentPage = (Integer) request.getAttribute("currentPage");
-    Integer totalPages = (Integer) request.getAttribute("totalPages");
-    System.out.println("DEBUG JSP - currentPage: " + currentPage);
-    System.out.println("DEBUG JSP - totalPages: " + totalPages);
-
-//    if (currentPage == null) {
-//        currentPage = 1; // Giá trị mặc định
-//    }
-//    if (totalPages == null) {
-//        totalPages = 1; // Giá trị mặc định
-//    }
-
-%>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Bất Động Sản</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="apple-touch-startup-image" href="images/">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <title>Login Form</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f7f7f7;
+        }
+
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            text-align: center;
+        }
+
+        .container h2 {
+            margin-bottom: 15px;
+        }
+
+        .logo {
+            font-size: 30px;
+            font-weight: bold;
+            background: #000;
+            color: #fff;
+            width: 130px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px auto;
+            border-radius: 5px;
+        }
+
+        .input-group {
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-bottom: 2px solid #ccc;
+            outline: none;
+            font-size: 16px;
+        }
+
+        .input-group input:focus {
+            border-bottom: 2px solid #6a11cb;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper i {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background: linear-gradient(to right, #00c6ff, #6a11cb);
+            color: #fff;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .login-btn:hover {
+            opacity: 0.9;
+        }
+
+        .signup-link {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .signup-link a {
+            color: #6a11cb;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
 </head>
 
 <body>
-<!-- Header -->
-<header>
-    <div class="logo">
-        <img src="images/Untitled-25-copy.jpg" alt="Savills">
-    </div>
-    <div class="account">
-        <a href="">Đăng nhập</a>
-    </div>
-</header>
-
-<!-- Thanh bộ lọc -->
-<form action="property-list" method="get" class="filter-bar">
-    <div class="filter-price">
-        <label for="min-price">Giá trong khoảng:</label>
-        <input type="number" id="min-price" name="minPrice" placeholder="Từ (USD)">
-        <input type="number" id="max-price" name="maxPrice" placeholder="Đến (USD)">
-    </div>
-    <div class="filter-type">
-        <label for="property-type">Loại hình bất động sản:</label>
-        <select id="property-type" name="searchPropertyType">
-            <option value="" disabled selected>Chọn loại hình bất động sản</option>
-            <option value="Căn hộ">Căn Hộ</option>
-            <option value="Nhà riêng">Nhà riêng</option>
-            <option value="Đất nền">Đất nền</option>
-        </select>
-    </div>
-    <div class="filter-Address">
-        <label for="address">Địa chỉ:</label>
-        <input type="text" id="address" name="searchAddress">
-    </div>
-    <button class="search-btn">Tìm kiếm</button>
-</form>
-
-<!-- Tiêu đề -->
-<section class="title">
-    <h1> Bất Động Sản Việt Nam</h1>
-</section>
-
-
-<% for (PropertyDto property : properties) { %>
-<section class="property-list">
-    <div class="slider-container">
-        <button id="prevBtn">❮</button>
-        <div class="slider">
-            <img src="<%= property.getImageUrl() %>" alt="<%= property.getTitle() %>">
+<div class="container">
+    <h2>Welcome</h2>
+    <div class="logo">BĐS-VN</div>
+    <form action="property-list" method="post">
+        <div class="input-group">
+            <label>Email</label>
+            <input type="email" name="email" required>
         </div>
-        <button id="nextBtn">❯</button>
-    </div>
-
-    <div class="property-info" >
-        <p class="price"><%= property.getPrice() %> $</p>
-        <h2><%= property.getTitle() %></h2>
-        <p><%= property.getAddress() %></p>
-        <div style="background-color: red;">
-            <div><span>Loại bất động sản: <%= property.getPropertyType() %></span></div>
-            <div><span>Diện tích: <%= property.getAcreage() %> m²</span></div>
-            <p>Nhân viên tư vấn: </p>
-            <p><%= property.getFullName() %></p>
-            <p>📞 <%= property.getPhone() %></p>
-
+        <div class="input-group password-wrapper">
+            <label>Password</label>
+            <input type="password" id="password" name="password" required>
         </div>
-        <div class="agent">
-            <button type="button" class="btn btn-info">Xem chi tiết</button>
-        </div>
-
-    </div>
-
-</section>
-<% } %>
-
-<!-- Phân trang -->
-
-<div class="pagination">
-    <a href="property-list?page=<%= (currentPage > 1) ? currentPage - 1 : 1 %>"
-       class="pagination-btn <%= (currentPage == 1) ? "disabled" : "" %>">
-        Trước
-    </a>
-    <span>Trang <%= currentPage %> / <%= totalPages %></span>
-    <a href="property-list?page=<%= (currentPage < totalPages) ? currentPage + 1 : totalPages %>"
-       class="pagination-btn <%= (currentPage == totalPages) ? "disabled" : "" %>">
-        Tiếp theo
-    </a>
+        <button type="submit" class="login-btn">LOGIN</button>
+    </form>
+    <p class="signup-link">Don't have an account? <a href="register.jsp">Sign Up</a></p>
 </div>
 
-
-<script src="script.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
 </body>
 
 </html>

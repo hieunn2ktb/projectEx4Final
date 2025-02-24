@@ -2,6 +2,7 @@ package ks.training.dao;
 
 import ks.training.dto.PropertyDto;
 import ks.training.dto.UserDto;
+import ks.training.entity.Property;
 import ks.training.entity.User;
 import ks.training.utils.DatabaseConnection;
 
@@ -127,6 +128,70 @@ public class PropertyDao {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void addProperty(Property property) {
+        String sql = "INSERT INTO properties (title, description, price, address, property_type, acreage, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, property.getTitle());
+            pstmt.setString(2, property.getDescription());
+            pstmt.setDouble(3, property.getPrice());
+            pstmt.setString(4, property.getAddress());
+            pstmt.setString(5, property.getPropertyType());
+            pstmt.setDouble(6, property.getAcreage());
+            pstmt.setInt(7, property.getCreatedBy());
+
+            pstmt.executeUpdate();
+            System.out.println("Thêm bất động sản thành công!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void updateProperty(Property property) {
+        String sql = "UPDATE properties SET title=?, description=?, price=?, address=?, property_type=?, acreage=? WHERE id=?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, property.getTitle());
+            pstmt.setString(2, property.getDescription());
+            pstmt.setDouble(3, property.getPrice());
+            pstmt.setString(4, property.getAddress());
+            pstmt.setString(5, property.getPropertyType());
+            pstmt.setDouble(6, property.getAcreage());
+            pstmt.setInt(7, property.getId());
+
+            int rowsUpdated = pstmt.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("Cập nhật bất động sản thành công!");
+            } else {
+                System.out.println("Không tìm thấy bất động sản để cập nhật!");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void deleteProperty(int id) {
+        String sql = "DELETE FROM properties WHERE id=?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+
+            int rowsDeleted = pstmt.executeUpdate();
+            if (rowsDeleted > 0) {
+                System.out.println("Xóa bất động sản thành công!");
+            } else {
+                System.out.println("Không tìm thấy bất động sản để xóa!");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 
