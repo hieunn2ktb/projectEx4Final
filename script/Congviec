@@ -1,0 +1,49 @@
+1. Admin
+Admin có quyền quản lý toàn bộ hệ thống, bao gồm:
+
+Quản lý tài khoản
+Tạo, chỉnh sửa, xóa tài khoản nhân viên.
+Phân quyền tài khoản.
+Quản lý bất động sản
+Thêm, sửa, xóa bất động sản.
+Xem danh sách bất động sản.
+Tìm kiếm bất động sản theo tiêu chí.
+Quản lý khách hàng
+Xem danh sách khách hàng.
+Cập nhật thông tin khách hàng.
+Quản lý giao dịch
+Xem danh sách giao dịch.
+Cập nhật trạng thái giao dịch.
+Gửi email thông báo về trạng thái giao dịch.
+Xem báo cáo
+Thống kê giao dịch theo tháng.
+Báo cáo doanh thu.
+2. Nhân viên
+Nhân viên chỉ có quyền thao tác trên bất động sản và giao dịch nhưng không thể phân quyền tài khoản hoặc xem báo cáo doanh thu.
+
+Quản lý bất động sản
+Thêm, sửa, xóa bất động sản (nếu chưa có giao dịch liên quan).
+Xem danh sách bất động sản.
+Tìm kiếm bất động sản theo tiêu chí.
+Quản lý giao dịch
+Tạo giao dịch mới.
+Cập nhật trạng thái giao dịch.
+Gửi email thông báo khi trạng thái giao dịch thay đổi.
+Xem danh sách khách hàng
+Xem thông tin khách hàng để hỗ trợ giao dịch.
+3. Khách hàng
+Khách hàng có quyền đăng ký tài khoản, tìm kiếm bất động sản, thực hiện giao dịch và theo dõi lịch sử hoạt động của mình.
+
+Tài khoản cá nhân
+Đăng ký, đăng nhập.
+Cập nhật thông tin cá nhân.
+Tìm kiếm bất động sản
+Tìm kiếm theo địa chỉ, giá, loại hình.
+Xem chi tiết bất động sản.
+Quản lý giao dịch
+Yêu cầu đặt cọc/mua bất động sản.
+Xem trạng thái giao dịch.
+Nhận thông báo qua email khi trạng thái giao dịch thay đổi.
+Xem lịch sử hoạt động
+Lịch sử bất động sản đã xem.
+Lịch sử giao dịch đã thực hiện.
