@@ -1,3 +1,4 @@
+<%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -118,8 +119,18 @@
 <body>
 <div class="container">
     <h2>Welcome</h2>
-    <div class="logo">BĐS-VN</div>
-    <form action="property-list" method="post">
+    <div class="logo">BĐSVN</div>
+    <%
+        String error = request.getAttribute("error")+"";
+        if (error.equals("null")){
+            error = "";
+        }
+    %>
+
+    <div class="text-center"><span style="color: red"><%=error%></span></div>
+
+    <form action="user" method="post">
+        <input type="hidden" name="action" value="login">
         <div class="input-group">
             <label>Email</label>
             <input type="email" name="email" required>
@@ -130,7 +141,7 @@
         </div>
         <button type="submit" class="login-btn">LOGIN</button>
     </form>
-    <p class="signup-link">Don't have an account? <a href="register">Sign Up</a></p>
+    <p class="signup-link">Don't have an account? <a href="register.jsp">Sign Up</a></p>
 </div>
 
 </body>

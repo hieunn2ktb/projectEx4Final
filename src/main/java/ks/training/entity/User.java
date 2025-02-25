@@ -9,8 +9,19 @@ public class User {
     private String address;
     private String createdAt;
 
+    public User() {
+    }
 
-    public User(int id, String fullName, String email, String password, String phone, String address, String createdAt) {
+//    public User(int id, String fullName, String email, String password, String phone, String address, String createdAt) {
+//        this.id = id;
+//        this.fullName = fullName;
+//        this.email = email;
+//        this.password = password;
+//        this.phone = phone;
+//        this.address = address;
+//        this.createdAt = createdAt;
+//    }
+    public User(int id,String email,String password,String fullName,String phone,String address,String createdAt){
         this.id = id;
         this.fullName = fullName;
         this.email = email;
@@ -77,5 +88,18 @@ public class User {
 
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", fullName='" + fullName + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", phone='" + phone + '\'' +
+                ", address='" + address + '\'' +
+                ", createdAt='" + createdAt + '\'' +
+                '}';
     }
 }

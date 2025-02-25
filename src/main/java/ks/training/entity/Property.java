@@ -1,5 +1,7 @@
 package ks.training.entity;
 
+import java.util.List;
+
 public class Property {
     private int id;
     private String title;
@@ -10,6 +12,10 @@ public class Property {
     private int createdBy;
     private String createdAt;
     private int acreage;
+    private String img;
+    private List<String> images;
+    public Property() {
+    }
 
     public Property(int id, String title, String description, double price, String address, String propertyType, int createdBy, String createdAt, int acreage) {
         this.id = id;
@@ -21,6 +27,23 @@ public class Property {
         this.createdBy = createdBy;
         this.createdAt = createdAt;
         this.acreage = acreage;
+    }
+
+    public List<String> getImages() {
+        return images;
+    }
+
+
+    public void setImages(List<String> images) {
+        this.images = images;
+    }
+
+    public String getImg() {
+        return img;
+    }
+
+    public void setImg(String img) {
+        this.img = img;
     }
 
     public double getAcreage() {

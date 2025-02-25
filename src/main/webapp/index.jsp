@@ -1,136 +1,299 @@
+<%@ page import="ks.training.entity.User" %>
+<%@ page contentType="text/html; charset=UTF-8" language="java" %>
+<%@ page import="java.util.List, ks.training.dto.PropertyDto" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
+<%
+    List<PropertyDto> properties = (List<PropertyDto>) session.getAttribute("properties");
+    if (properties == null) properties = new ArrayList<>();
+%>
+<%
+    Integer currentPage = (Integer) session.getAttribute("currentPage");
+    Integer totalPages = (Integer) session.getAttribute("totalPages");
+
+    System.out.println("DEBUG JSP - currentPage: " + currentPage);
+    System.out.println("DEBUG JSP - totalPages: " + totalPages);
+%>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Form</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Trang Bất Động Sản</title>
+    <link rel="stylesheet" href="views/css/style.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
+            font-family: Arial, sans-serif;
         }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            padding: 8px 16px;
+            margin: 0 4px;
+            border: 1px solid #ddd;
+            text-decoration: none;
+            color: black;
+            background-color: white;
+        }
+
+        .pagination a.active {
+            font-weight: bold;
+            background-color: lightgray;
+        }
+
+        .pagination a:hover {
+            background-color: #ddd;
+        }
+
 
         body {
+            background-color: #f8f8f8;
+        }
+
+        .navbar {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            height: 100vh;
-            background: #f7f7f7;
+            background-color: white;
+            padding: 15px 50px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        .container {
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            width: 350px;
-            text-align: center;
-        }
-
-        .container h2 {
-            margin-bottom: 15px;
-        }
-
-        .logo {
-            font-size: 30px;
+        .navbar .logo {
+            font-size: 20px;
             font-weight: bold;
-            background: #000;
-            color: #fff;
-            width: 130px;
-            height: 50px;
+            color: red;
+        }
+
+        .navbar ul {
+            list-style: none;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 10px auto;
+        }
+
+        .navbar ul li {
+            margin: 0 15px;
+        }
+
+        .navbar ul li a {
+            text-decoration: none;
+            color: black;
+        }
+
+        .navbar .btn {
+            background-color: red;
+            color: white;
+            padding: 8px 15px;
             border-radius: 5px;
         }
 
-        .input-group {
-            margin: 15px 0;
-            text-align: left;
+        .hero {
+            background: red;
+            color: white;
+            text-align: center;
+            padding: 50px 20px;
         }
 
-        .input-group label {
-            display: block;
-            font-size: 14px;
-            color: #555;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 8px;
-            border: none;
-            border-bottom: 2px solid #ccc;
-            outline: none;
-            font-size: 16px;
-        }
-
-        .input-group input:focus {
-            border-bottom: 2px solid #6a11cb;
-        }
-
-        .password-wrapper {
-            position: relative;
-        }
-
-        .password-wrapper i {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-        }
-
-        .login-btn {
-            width: 100%;
+        .search-box input {
+            width: 300px;
             padding: 10px;
             border: none;
-            background: linear-gradient(to right, #00c6ff, #6a11cb);
-            color: #fff;
-            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-btn {
+            background-color: white;
+            color: red;
+            border: none;
+            padding: 10px 15px;
             border-radius: 5px;
             cursor: pointer;
-            transition: 0.3s;
         }
 
-        .login-btn:hover {
-            opacity: 0.9;
+        .real-estate-list {
+            padding: 20px;
+            background: white;
+            margin: 20px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
-        .signup-link {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #555;
+        .property {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 50%;
+
         }
 
-        .signup-link a {
-            color: #6a11cb;
-            text-decoration: none;
-            font-weight: bold;
+        .property-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .property-image img {
+            width: 150px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .property-info {
+            margin-left: 20px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            margin: 5px;
+            padding: 8px 12px;
+            border: none;
+            background-color: #f1f1f1;
+            cursor: pointer;
+        }
+
+        .pagination button:hover {
+            background-color: #ddd;
         }
     </style>
 </head>
 
 <body>
-<div class="container">
-    <h2>Welcome</h2>
-    <div class="logo">BĐS-VN</div>
-    <form action="property-list" method="post">
-        <div class="input-group">
-            <label>Email</label>
-            <input type="email" name="email" required>
+<%
+    Object obj = session.getAttribute("User");
+    User user = null;
+    if (obj != null) {
+        user = (User) obj;
+    }
+%>
+
+<header class="navbar">
+    <div class="logo">Batdongsan</div>
+    <nav>
+        <ul>
+            <% if (user == null) { %>
+            <li><a href="login.jsp" class="btn">Đăng Nhập</a></li>
+            <% } else { %>
+            <li><a style="while-space: nowrap;">Xin chào <%=user.getFullName()%>
+            </a></li>
+            <li><a href="user?action=logout" class="btn">Đăng xuất</a></li>
+            <% } %>
+
+        </ul>
+    </nav>
+</header>
+
+<section class="hero">
+    <form action="" method="get">
+        <div class="search-box">
+            <label for="address">Địa chỉ:</label>
+            <input type="text" id="address" name="searchAddress">
         </div>
-        <div class="input-group password-wrapper">
-            <label>Password</label>
-            <input type="password" id="password" name="password" required>
+        <div class="filter-container">
+            <div class="filter-item">
+                <label for="property-type">Loại hình:</label>
+                <select id="property-type" name="searchPropertyType">
+                    <option value="" disabled selected>Chọn loại hình bất động sản</option>
+                    <option value="Căn hộ">Căn Hộ</option>
+                    <option value="Nhà riêng">Nhà riêng</option>
+                    <option value="Đất nền">Đất nền</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label for="min-price">Giá:</label>
+                <input type="number" id="min-price" name="minPrice" placeholder="Từ (USD)">
+                <input type="number" id="max-price" name="maxPrice" placeholder="Đến (USD)">
+            </div>
+            <button class="search-btn">Tìm kiếm</button>
         </div>
-        <button type="submit" class="login-btn">LOGIN</button>
+        </div>
     </form>
-    <p class="signup-link">Don't have an account? <a href="register.jsp">Sign Up</a></p>
+
+    <h1>Danh Sách Bất Động Sản</h1>
+</section>
+<% for (PropertyDto property : properties) { %>
+<section class="real-estate-list">
+    <div class="property-list">
+        <div class="property">
+            <div class="property-image">
+                <img src="<%= property.getImageUrl() %>" alt="<%= property.getTitle() %>">
+            </div>
+            <div class="property-info">
+                <h3><%= property.getTitle() %>
+                </h3>
+                <p>Giá: <%=property.getPrice()%>
+                </p>
+                <p>Diện tích: <%=property.getAcreage()%>
+                </p>
+                <p>Địa chỉ: <%= property.getAddress() %>
+                </p>
+                <p>Loại Hình: <%=property.getPropertyType()%>
+                </p>
+            </div>
+            <% if (user != null) { %>
+            <a href="views/PropertyInfo.jsp?id=<%= property.getId() %>">
+                Xem chi Tiết
+            </a>
+            <% } %>
+        </div>
+
+    </div>
+</section>
+<% } %>
+<div>
+    <div class="pagination">
+        <c:if test="${currentPage > 1}">
+            <a href="${pageContext.request.contextPath}?page=${currentPage - 1}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchAddress=${searchAddress}&searchPropertyType=${searchPropertyType}">
+                &laquo; Trước
+            </a>
+        </c:if>
+
+        <c:forEach var="i" begin="1" end="${totalPages}">
+            <a href="${pageContext.request.contextPath}?page=${i}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchAddress=${searchAddress}&searchPropertyType=${searchPropertyType}"
+               class="${i == currentPage ? 'active' : ''}">
+                    ${i}
+            </a>
+        </c:forEach>
+
+        <c:if test="${currentPage < totalPages}">
+            <a href="${pageContext.request.contextPath}?page=${currentPage + 1}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchAddress=${searchAddress}&searchPropertyType=${searchPropertyType}">
+                Tiếp &raquo;
+            </a>
+        </c:if>
+    </div>
+
 </div>
 
 </body>

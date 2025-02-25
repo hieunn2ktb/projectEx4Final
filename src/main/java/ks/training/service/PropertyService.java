@@ -24,14 +24,13 @@ public class PropertyService {
     public int countProperties(String minPrice, String maxPrice, String searchAddress, String searchPropertyType) throws SQLException {
         return propertyDao.countProperties(minPrice, maxPrice, searchAddress, searchPropertyType);
     }
-    public UserDto validateUser(String username, String password) throws SQLException {
-        return propertyDao.validateUser(username, password);
-    }
+
     public void addProperty(Property property) {
         try (Connection conn = DatabaseConnection.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                propertyDao.addProperty(property);
+                propertyDao.addProperty(conn, property);
+                propertyDao.addProperty(conn, property);
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -42,11 +41,15 @@ public class PropertyService {
         }
     }
 
+    public Property findPropertyById(int id) {
+        return propertyDao.findPropertyById(id);
+    }
+
     public void updateProperty(Property property) {
         try (Connection conn = DatabaseConnection.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                propertyDao.updateProperty(property);
+                propertyDao.updateProperty(conn, property);
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -61,7 +64,7 @@ public class PropertyService {
         try (Connection conn = DatabaseConnection.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                propertyDao.deleteProperty(id);
+                propertyDao.deleteProperty(conn, id);
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();

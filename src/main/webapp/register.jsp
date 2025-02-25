@@ -11,43 +11,59 @@
 </head>
 
 <body>
+<%
+    String error = (request.getAttribute("error") + "");
+    error = error.equals("null") ? "" : error;
+
+    String email = request.getAttribute("email") + "";
+    email = email.equals("null") ? "" : email;
+    String fullName = request.getAttribute("fullName") + "";
+    fullName = fullName.equals("null") ? "" : fullName;
+    String phone = request.getAttribute("phone") + "";
+    phone = phone.equals("null") ? "" : phone;
+    String address = request.getAttribute("address") + "";
+    address = address.equals("null") ? "" : address;
+
+%>
 <div class="container">
-    <form action="do-Register" method="post">
-        <div>
-            <h1>Register</h1>
-            <p>Please fill in this form to create an account.</p>
-            <hr>
+    <div>
+        <h1>Register</h1>
+        <p>Please fill in this form to create an account.</p>
+        <hr>
+        <div class="text-danger" id="error"><%=error%>
         </div>
+    </div>
+    <form action="user" method="post">
+        <input type="hidden" name="action" value="register">
         <div class="mb-3">
             <label for="fullName"><b>Full Name</b></label>
             <input type="text" class="form-control" placeholder="Enter Full Name" name="fullName" id="fullName"
-                   required>
+                   required value="<%=fullName%>">
         </div>
         <div class="mb-3">
             <label for="phone" class="form-label"><b>Phone</b></label>
-            <input type="tel" class="form-control" placeholder="phone" name="phone" id="phone" required>
+            <input type="tel" class="form-control" placeholder="phone" name="phone" id="phone" required value="<%=phone%>">
         </div>
         <div class="mb-3">
             <label for="address"><b>Address</b></label>
-            <input type="text" class="form-control" placeholder="address" name="address" id="address" required>
+            <input type="text" class="form-control" placeholder="address" name="address" id="address" required value="<%=address%>">
         </div>
         <div class="mb-3">
             <label for="email"><b>Email</b></label>
-            <input type="email" class="form-control" placeholder="Enter Email" name="email" id="email" required>
+            <input type="email" class="form-control" placeholder="Enter Email" name="email" id="email" required value="<%=email%>">
         </div>
         <div class="mb-3">
             <label for="psw"><b>Password</b></label>
-            <input type="password" class="form-control" placeholder="Enter Password" name="psw" id="psw" required onkeyup="checkPasswordMatch()">
+            <input type="password" class="form-control" placeholder="Enter Password" name="psw" id="psw" required
+                   onkeyup="checkPasswordMatch()">
         </div>
         <div class="mb-3">
-            <label for="rePassword"><b>Repeat Password</b></label> <span class="error"><span id="msg" class="text-danger"></span></span>
+            <label for="rePassword"><b>Repeat Password</b></label> <span class="error"><span id="msg"
+                                                                                             class="text-danger"></span></span>
             <input type="password" class="form-control" placeholder="Repeat Password" name="rePassword"
                    id="rePassword" required onkeyup="checkPasswordMatch()">
         </div>
         <input type="submit" class="btn btn-primary form-control" value="Register" name="register">
-        <div class="container signin">
-            <p>Already have an account? <a href="#">Sign in</a>.</p>
-        </div>
     </form>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
@@ -65,7 +81,7 @@
         if (password != rePassword) {
             rePassword = document.getElementById("msg").innerHTML = "Password does not match";
             return false;
-        }else {
+        } else {
             rePassword = document.getElementById("msg").innerHTML = "";
             return true;
         }

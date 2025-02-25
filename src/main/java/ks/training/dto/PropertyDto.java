@@ -1,6 +1,7 @@
 package ks.training.dto;
 
 public class PropertyDto {
+    private int id;
     private String imageUrl;
     private String title;
     private String description;
@@ -24,6 +25,14 @@ public class PropertyDto {
         this.acreage = acreage;
         this.fullName = fullName;
         this.phone = phone;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getImageUrl() {

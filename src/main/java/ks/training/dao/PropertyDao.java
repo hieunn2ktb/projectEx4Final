@@ -1,9 +1,7 @@
 package ks.training.dao;
 
 import ks.training.dto.PropertyDto;
-import ks.training.dto.UserDto;
 import ks.training.entity.Property;
-import ks.training.entity.User;
 import ks.training.utils.DatabaseConnection;
 
 import java.sql.Connection;
@@ -17,12 +15,10 @@ public class PropertyDao {
 
     public List<PropertyDto> findPropertiesByPage(String minPrice, String maxPrice, String searchAddress, String searchPropertyType, int page, int pageSize) throws SQLException {
         int offset = (page - 1) * pageSize;
-        String sql = "SELECT pi.image_url, p.title, p.price, p.description, " +
-                "p.address, p.property_type, p.acreage, u.full_name, u.phone " +
-                "FROM properties p " +
-                "LEFT JOIN property_images pi ON pi.property_id = p.id " +
-                "JOIN users u ON p.created_by = u.id WHERE 1=1";
-
+        String sql = "SELECT p.id, p.image_url, p.title, p.price, p.description, \n" +
+                "                p.address, p.property_type, p.acreage, u.full_name, u.phone\n" +
+                "                FROM properties p \n" +
+                "                JOIN users u ON p.created_by = u.id WHERE 1=1";
         List<Object> params = new ArrayList<>();
 
         if (minPrice != null && maxPrice != null && !minPrice.isEmpty() && !maxPrice.isEmpty()) {
@@ -57,6 +53,7 @@ public class PropertyDao {
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     PropertyDto propertyDto = new PropertyDto();
+                    propertyDto.setId(rs.getInt("id"));
                     propertyDto.setImageUrl(rs.getString("image_url"));
                     propertyDto.setTitle(rs.getString("title"));
                     propertyDto.setPrice(rs.getDouble("price"));
@@ -112,29 +109,11 @@ public class PropertyDao {
         return 0;
     }
 
-    public UserDto validateUser(String username, String password) {
-        String sql = "SELECT u.id , u.email,u.password, r.name FROM users u Join user_roles ur ON u.id = ur.user_id join roles r ON ur.role_id = r.id WHERE u.email = ? AND password = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return new UserDto(rs.getInt("id"), rs.getString("username"), rs.getString("password"), rs.getString("role"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public void addProperty(Property property) {
+    public void addProperty(Connection conn, Property property) {
         String sql = "INSERT INTO properties (title, description, price, address, property_type, acreage, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, property.getTitle());
             pstmt.setString(2, property.getDescription());
             pstmt.setDouble(3, property.getPrice());
@@ -151,11 +130,11 @@ public class PropertyDao {
     }
 
 
-    public void updateProperty(Property property) {
+    public void updateProperty(Connection conn, Property property) {
         String sql = "UPDATE properties SET title=?, description=?, price=?, address=?, property_type=?, acreage=? WHERE id=?";
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, property.getTitle());
             pstmt.setString(2, property.getDescription());
             pstmt.setDouble(3, property.getPrice());
@@ -176,11 +155,10 @@ public class PropertyDao {
     }
 
 
-    public void deleteProperty(int id) {
+    public void deleteProperty(Connection conn, int id) {
         String sql = "DELETE FROM properties WHERE id=?";
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
 
             int rowsDeleted = pstmt.executeUpdate();
@@ -195,4 +173,46 @@ public class PropertyDao {
     }
 
 
+    public Property findPropertyById(int id) {
+        String sql = "SELECT * FROM properties WHERE id = ?";
+        String imageSql = "SELECT image_url FROM property_images WHERE property_id = ?";
+        Property property = null;
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setInt(1, id);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        property = new Property();
+                        property.setId(rs.getInt("id"));
+                        property.setTitle(rs.getString("title"));
+                        property.setDescription(rs.getString("description"));
+                        property.setPrice(rs.getDouble("price"));
+                        property.setAddress(rs.getString("address"));
+                        property.setPropertyType(rs.getString("property_type"));
+                        property.setAcreage(rs.getInt("acreage"));
+                    }
+                }
+            }
+            if (property != null) {
+                List<String> images = new ArrayList<>();
+                try (PreparedStatement imgStmt = conn.prepareStatement(imageSql)) {
+                    imgStmt.setInt(1, id);
+                    try (ResultSet imgRs = imgStmt.executeQuery()) {
+                        while (imgRs.next()) {
+                            images.add(imgRs.getString("image_url"));
+                        }
+                    }
+                }
+                property.setImages(images);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return property;
+    }
 }
+
+
+

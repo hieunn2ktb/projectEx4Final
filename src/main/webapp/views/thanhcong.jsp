@@ -8,6 +8,6 @@
 </head>
 <body>
 	<div class="container">Thao tác thành công! Vui lòng quay lại trang đăng nhập.</div>
-    <
+
 </body>
 </html>
