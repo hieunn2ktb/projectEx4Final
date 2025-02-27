@@ -1,5 +1,7 @@
 <%@ page import="ks.training.service.PropertyService" %>
 <%@ page import="ks.training.entity.Property" %>
+<%@ page import="ks.training.dao.PropertyDao" %>
+<%@ page import="java.util.List" %>
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 
 <%
@@ -14,8 +16,11 @@
     }
 %>
 <%
+    System.out.println(propertyId);
     PropertyService propertyService = new PropertyService();
     Property property = propertyService.findPropertyById(propertyId);
+    PropertyDao propertyDao = new PropertyDao();
+    List<byte[]> images = propertyDao.getImagesByPropertyId(propertyId);
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -65,22 +70,22 @@
 <div class="container mt-5">
     <div class="row property-container">
         <div class="col-md-8">
-            <% if (property != null && property.getImages() != null && !property.getImages().isEmpty()) { %>
+            <% if (images != null && !images.isEmpty()) { %>
             <div id="propertyCarousel" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-inner">
-                    <% boolean first = true; %>
-                    <% for (String imageUrl : property.getImages()) { %>
-                    <div class="carousel-item <%= first ? "active" : "" %>">
-                        <img src="<%= imageUrl %>" class="d-block w-100" alt="Hình ảnh bất động sản">
+                    <% for (int i = 0; i < images.size(); i++) { %>
+                    <div class="carousel-item <%= i == 0 ? "active" : "" %>">
+                        <img src="<%= request.getContextPath() %>/ImageServlet?propertyId=<%= propertyId %>&imageIndex=<%= i %>" class="d-block w-100" alt="<%=property.getTitle()%>">
                     </div>
-                    <% first = false; %>
                     <% } %>
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#propertyCarousel" data-bs-slide="prev">
+                <button class="carousel-control-prev" type="button" data-bs-target="#propertyCarousel"
+                        data-bs-slide="prev">
                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Previous</span>
                 </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#propertyCarousel" data-bs-slide="next">
+                <button class="carousel-control-next" type="button" data-bs-target="#propertyCarousel"
+                        data-bs-slide="next">
                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Next</span>
                 </button>
@@ -90,10 +95,14 @@
         </div>
         <% if (property != null) { %>
         <div class="col-md-4">
-            <h3 class="mt-3"><%=property.getDescription()%></h3>
-            <p><strong>Địa chỉ:</strong> <%=property.getAddress()%></p>
-            <p class="price"><%=String.format("%.1f", property.getPrice() /1000000000)%> Tỷ (~<%=String.format("%.1f", property.getPrice() / (property.getAcreage() * 1000000))%>triệu/m²)</p>
-            <p><strong>Diện tích:</strong> <%=property.getAcreage()%></p>
+            <h3 class="mt-3"><%=property.getDescription()%>
+            </h3>
+            <p><strong>Địa chỉ:</strong> <%=property.getAddress()%>
+            </p>
+            <p class="price"><%=String.format("%.1f", property.getPrice() / 1000000000)%> Tỷ
+                (~<%=String.format("%.1f", property.getPrice() / (property.getAcreage() * 1000000))%>triệu/m²)</p>
+            <p><strong>Diện tích:</strong> <%=property.getAcreage()%>
+            </p>
             <div class="alert alert-success" role="alert">
                 <strong>⬆ 75%</strong> Giá tại khu vực này đã tăng trong vòng 1 năm qua.
             </div>

@@ -2,12 +2,11 @@ package ks.training.dao;
 
 import ks.training.dto.PropertyDto;
 import ks.training.entity.Property;
+import ks.training.exception.RecordNotFoundException;
 import ks.training.utils.DatabaseConnection;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.io.OutputStream;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -154,32 +153,40 @@ public class PropertyDao {
         }
     }
 
+    public boolean checkTransactionSQL(int id) {
+        String checkTransactionSQL = "SELECT COUNT(*) FROM transactions WHERE property_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement checkStmt = conn.prepareStatement(checkTransactionSQL)) {
+            checkStmt.setInt(1, id);
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-    public void deleteProperty(Connection conn, int id) {
+    public int deleteProperty(Connection conn, int id) {
         String sql = "DELETE FROM properties WHERE id=?";
-
+        int rowsDeleted = 0;
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
-
-            int rowsDeleted = pstmt.executeUpdate();
-            if (rowsDeleted > 0) {
-                System.out.println("Xóa bất động sản thành công!");
-            } else {
-                System.out.println("Không tìm thấy bất động sản để xóa!");
-            }
+            rowsDeleted = pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return rowsDeleted;
     }
 
 
     public Property findPropertyById(int id) {
         String sql = "SELECT * FROM properties WHERE id = ?";
-        String imageSql = "SELECT image_url FROM property_images WHERE property_id = ?";
         Property property = null;
 
         try (Connection conn = DatabaseConnection.getConnection()) {
-
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setInt(1, id);
                 try (ResultSet rs = pstmt.executeQuery()) {
@@ -195,22 +202,27 @@ public class PropertyDao {
                     }
                 }
             }
-            if (property != null) {
-                List<String> images = new ArrayList<>();
-                try (PreparedStatement imgStmt = conn.prepareStatement(imageSql)) {
-                    imgStmt.setInt(1, id);
-                    try (ResultSet imgRs = imgStmt.executeQuery()) {
-                        while (imgRs.next()) {
-                            images.add(imgRs.getString("image_url"));
-                        }
-                    }
-                }
-                property.setImages(images);
-            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return property;
+    }
+    public List<byte[]> getImagesByPropertyId(int propertyId) {
+        List<byte[]> images = new ArrayList<>();
+        String sql = "SELECT image_data FROM property_images WHERE property_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, propertyId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                images.add(rs.getBytes("image_data"));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return images;
     }
 }
 

@@ -8,7 +8,7 @@ public class User {
     private String phone;
     private String address;
     private String createdAt;
-
+    private String role;
     public User() {
     }
 
@@ -32,7 +32,13 @@ public class User {
     }
 
 
+    public String getRole() {
+        return role;
+    }
 
+    public void setRole(String role) {
+        this.role = role;
+    }
 
     public int getId() {
         return id;

@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import ks.training.dao.UserDao;
 import ks.training.entity.User;
 import ks.training.service.UserService;
 
@@ -40,21 +39,28 @@ public class UserController extends HttpServlet {
     private void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
-        User user = new User();
-        user.setEmail(email);
-        user.setPassword(password);
-        User result = userService.selectByEmailAndPassWord(user);
-        String url = "";
-        if (result != null) {
+
+        User user = userService.validateUser(email, password);
+
+        if (user != null) {
             HttpSession session = request.getSession();
-            session.setAttribute("User", result);
-            url = "/index.jsp";
-        }else {
+            session.setAttribute("User", user);
+
+            switch (user.getRole()) {
+                case "Admin":
+                    response.sendRedirect("admin/dashboard.jsp");
+                    break;
+                case "Employee":
+                case "Customer":
+                    RequestDispatcher rd = getServletContext().getRequestDispatcher("/index.jsp");
+                    rd.forward(request,response);
+                    break;
+            }
+        } else {
             request.setAttribute("error","Email hoặc mật khẩu không chính xác");
-            url = "/login.jsp";
+            RequestDispatcher rd = getServletContext().getRequestDispatcher("/login.jsp");
+            rd.forward(request,response);
         }
-        RequestDispatcher rd = getServletContext().getRequestDispatcher(url);
-        rd.forward(request,response);
     }
     private void logout(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
         HttpSession session = request.getSession();
@@ -85,7 +91,7 @@ public class UserController extends HttpServlet {
         }
         request.setAttribute("error", msgError);
 
-        if (msgError.length() > 0) {
+        if (!msgError.isEmpty()) {
             url = "/register.jsp";
         } else {
             userService.register(email, password, fullName, phone, address);

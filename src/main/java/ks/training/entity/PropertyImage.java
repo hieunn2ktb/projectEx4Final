@@ -1,14 +1,20 @@
 package ks.training.entity;
 
+import java.sql.Timestamp;
+
 public class PropertyImage {
     private int id;
     private int propertyId;
-    private String imageUrl;
+    private byte[] imageData;
+    private Timestamp uploadedAt;
 
-    public PropertyImage(int id, int propertyId, String imageUrl) {
+    public PropertyImage() {}
+
+    public PropertyImage(int id, int propertyId, byte[] imageData, Timestamp uploadedAt) {
         this.id = id;
         this.propertyId = propertyId;
-        this.imageUrl = imageUrl;
+        this.imageData = imageData;
+        this.uploadedAt = uploadedAt;
     }
 
     public int getId() {
@@ -27,11 +33,19 @@ public class PropertyImage {
         this.propertyId = propertyId;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public byte[] getImageData() {
+        return imageData;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setImageData(byte[] imageData) {
+        this.imageData = imageData;
+    }
+
+    public Timestamp getUploadedAt() {
+        return uploadedAt;
+    }
+
+    public void setUploadedAt(Timestamp uploadedAt) {
+        this.uploadedAt = uploadedAt;
     }
 }

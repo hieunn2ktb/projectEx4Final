@@ -101,4 +101,33 @@ public class UserDao {
         return result;
     }
 
+    public User validateUser(String email, String password) {
+        User user = null;
+        try (Connection conn = DatabaseConnection.getConnection()) {
+
+            String sql = "SELECT u.id, u.full_name, u.email, u.password, r.name AS role FROM users u " +
+                    "JOIN user_roles ur ON u.id = ur.user_id " +
+                    "JOIN roles r ON ur.role_id = r.id " +
+                    "WHERE u.email = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, email);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                String hashedPassword = rs.getString("password");
+
+                if (BCrypt.checkpw(password, hashedPassword)) {
+                    user = new User();
+                    user.setId(rs.getInt("id"));
+                    user.setFullName(rs.getString("full_name"));
+                    user.setEmail(rs.getString("email"));
+                    user.setRole(rs.getString("role"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return user;
+    }
+
 }

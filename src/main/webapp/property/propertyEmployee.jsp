@@ -1,27 +1,18 @@
+<%@ page import="ks.training.entity.User" %>
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ page import="java.util.List, ks.training.dto.PropertyDto" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
-<%--<jsp:useBean id="currentPage" scope="request" type="java.lang.Integer" />--%>
-<%--<jsp:useBean id="totalPages" scope="request" type="java.lang.Integer" />--%>
-
 <%
-    List<PropertyDto> properties = (List<PropertyDto>) request.getAttribute("properties");
+    List<PropertyDto> properties = (List<PropertyDto>) session.getAttribute("properties");
     if (properties == null) properties = new ArrayList<>();
 %>
 <%
-    Integer currentPage = (Integer) request.getAttribute("currentPage");
-    Integer totalPages = (Integer) request.getAttribute("totalPages");
+    Integer currentPage = (Integer) session.getAttribute("currentPage");
+    Integer totalPages = (Integer) session.getAttribute("totalPages");
+
     System.out.println("DEBUG JSP - currentPage: " + currentPage);
     System.out.println("DEBUG JSP - totalPages: " + totalPages);
-
-//    if (currentPage == null) {
-//        currentPage = 1; // Giá trị mặc định
-//    }
-//    if (totalPages == null) {
-//        totalPages = 1; // Giá trị mặc định
-//    }
-
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -30,7 +21,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang Bất Động Sản</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="views/css/style.css">
     <style>
         * {
             margin: 0;
@@ -38,11 +29,13 @@
             box-sizing: border-box;
             font-family: Arial, sans-serif;
         }
+
         .pagination {
             display: flex;
             justify-content: center;
             margin-top: 20px;
         }
+
         .pagination a {
             padding: 8px 16px;
             margin: 0 4px;
@@ -51,10 +44,12 @@
             color: black;
             background-color: white;
         }
+
         .pagination a.active {
             font-weight: bold;
             background-color: lightgray;
         }
+
         .pagination a:hover {
             background-color: #ddd;
         }
@@ -167,10 +162,11 @@
         .property-image img {
             width: 150px;
             height: 100px;
-            object-fit: cover;
+            object-fit: contain;
             border-radius: 10px;
+            background-color: #f8f8f8;
+            display: block;
         }
-
         .property-info {
             margin-left: 20px;
         }
@@ -196,24 +192,39 @@
 </head>
 
 <body>
+<%
+    Object obj = session.getAttribute("User");
+    User user = null;
+    if (obj != null) {
+        user = (User) obj;
+    }
+%>
 
 <header class="navbar">
     <div class="logo">Batdongsan</div>
     <nav>
         <ul>
-            <li><a href="#" class="btn">Thêm Bất Động Sản</a></li>
+            <% if (user == null) { %>
+            <li><a href="login.jsp" class="btn">Đăng Nhập</a></li>
+            <% } else { %>
+            <li><a style="while-space: nowrap;">Xin chào <%=user.getFullName()%>
+            </a></li>
+            <li><a href="user?action=logout" class="btn">Đăng xuất</a></li>
+            <li><a href="property?action=logout" class="btn">Thêm Bất Động Sản</a></li>
+            <% } %>
+
         </ul>
     </nav>
 </header>
 
 <section class="hero">
-    <form action="property-list" method="get">
+    <form action="" method="get">
         <div class="search-box">
             <label for="address">Địa chỉ:</label>
             <input type="text" id="address" name="searchAddress">
         </div>
         <div class="filter-container">
-            <div class="filter-item" >
+            <div class="filter-item">
                 <label for="property-type">Loại hình:</label>
                 <select id="property-type" name="searchPropertyType">
                     <option value="" disabled selected>Chọn loại hình bất động sản</option>
@@ -239,52 +250,58 @@
     <div class="property-list">
         <div class="property">
             <div class="property-image">
-                <img src="<%= property.getImageUrl() %>" alt="<%= property.getTitle() %>">
+                <img src="<%= request.getContextPath() %>/ImageServlet?propertyId=<%= property.getId() %>&imageIndex=<%= 0 %>"
+                     class="d-block w-100" alt="<%=property.getTitle()%>">
             </div>
             <div class="property-info">
-                <h3><%= property.getTitle() %></h3>
-                <p>Giá: <%=property.getPrice()%></p>
-                <p>Diện tích: <%=property.getAcreage()%></p>
-                <p>Địa chỉ: <%= property.getAddress() %></p>
-                <p>Loại Hình: <%=property.getPropertyType()%></p>
+                <h3><%= property.getTitle() %>
+                </h3>
+                <p>Giá: <%=property.getPrice()%>
+                </p>
+                <p>Diện tích: <%=property.getAcreage()%>
+                </p>
+                <p>Địa chỉ: <%= property.getAddress() %>
+                </p>
+                <p>Loại Hình: <%=property.getPropertyType()%>
+                </p>
             </div>
-            <div class="property-info">
-                <button class="search-btn">Sửa Thông tin</button>
-            </div>
-            <div class="property-info">
-                <button class="search-btn">Xoá Bất động sản</button>
-            </div>
+            <% if (user != null) { %>
+            <a href="views/PropertyInfo.jsp?id=<%= property.getId() %>">
+                Chỉnh sửa
+            </a>
+            <a href="<%=request.getContextPath()%>/property?id=<%=property.getId()%>&action=delete<%= property.getId()%>">
+                Xóa
+            </a>
+            <% } %>
         </div>
 
     </div>
-
-
 </section>
 <% } %>
 <div>
     <div class="pagination">
-        <!-- Nút "Trước" -->
         <c:if test="${currentPage > 1}">
-            <a href="property-list?page=${currentPage - 1}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchAddress=${searchAddress}&searchPropertyType=${searchPropertyType}">
+            <a href="${pageContext.request.contextPath}?page=${currentPage - 1}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchAddress=${searchAddress}&searchPropertyType=${searchPropertyType}">
                 &laquo; Trước
             </a>
         </c:if>
 
-        <!-- Các số trang -->
         <c:forEach var="i" begin="1" end="${totalPages}">
-            <a href="property-list?page=${i}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchAddress=${searchAddress}&searchPropertyType=${searchPropertyType}"
+            <a href="${pageContext.request.contextPath}?page=${i}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchAddress=${searchAddress}&searchPropertyType=${searchPropertyType}"
                class="${i == currentPage ? 'active' : ''}">
                     ${i}
             </a>
         </c:forEach>
 
-        <!-- Nút "Tiếp" -->
         <c:if test="${currentPage < totalPages}">
-            <a href="property-list?page=${currentPage + 1}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchAddress=${searchAddress}&searchPropertyType=${searchPropertyType}">
+            <a href="${pageContext.request.contextPath}?page=${currentPage + 1}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchAddress=${searchAddress}&searchPropertyType=${searchPropertyType}">
                 Tiếp &raquo;
             </a>
         </c:if>
     </div>
+
 </div>
+
+</body>
 
 </html>

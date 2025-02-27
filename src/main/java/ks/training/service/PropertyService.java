@@ -2,7 +2,6 @@ package ks.training.service;
 
 import ks.training.dao.PropertyDao;
 import ks.training.dto.PropertyDto;
-import ks.training.dto.UserDto;
 import ks.training.entity.Property;
 import ks.training.utils.DatabaseConnection;
 
@@ -60,11 +59,16 @@ public class PropertyService {
         }
     }
 
-    public void deleteProperty(int id) {
+    public boolean checkTransactionSQL(int id) {
+        return propertyDao.checkTransactionSQL(id);
+    }
+
+    public int deleteProperty(int id) {
+        int rowsAffected = 0;
         try (Connection conn = DatabaseConnection.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                propertyDao.deleteProperty(conn, id);
+                rowsAffected = propertyDao.deleteProperty(conn, id);
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -73,6 +77,7 @@ public class PropertyService {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return rowsAffected;
     }
 
 }

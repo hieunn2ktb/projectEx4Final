@@ -1,7 +1,6 @@
 package ks.training.service;
 
 import ks.training.dao.UserDao;
-import ks.training.entity.Property;
 import ks.training.entity.User;
 import ks.training.utils.DatabaseConnection;
 
@@ -35,5 +34,7 @@ public class UserService {
     public User selectByEmailAndPassWord(User user){
         return userDao.selectByEmailAndPassWord(user);
     }
-
+    public User validateUser(String email, String password){
+        return userDao.validateUser(email,password);
+    }
 }
