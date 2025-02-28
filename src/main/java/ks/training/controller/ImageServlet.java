@@ -1,36 +1,61 @@
 package ks.training.controller;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ks.training.utils.DatabaseConnection;
+import ks.training.dao.PropertyDao;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.io.OutputStream;
+import java.util.List;
 
-@WebServlet("/image")
+@WebServlet("/ImageServlet")
 public class ImageServlet extends HttpServlet {
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String propertyId = request.getParameter("id");
+    private final PropertyDao propertyDao = new PropertyDao();
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement("SELECT image_data FROM property_images WHERE property_id = ?")) {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        System.out.println(" Servlet duoc ket noi!");
 
-            pstmt.setInt(1, Integer.parseInt(propertyId));
-            ResultSet rs = pstmt.executeQuery();
+        try {
+            int propertyId = Integer.parseInt(request.getParameter("propertyId"));
+            int imageIndex = Integer.parseInt(request.getParameter("imageIndex"));
+            System.out.println(" propertyId: " + propertyId + ", imageIndex: " + imageIndex);
 
-            if (rs.next()) {
-                byte[] imgData = rs.getBytes("image_data");
+            List<byte[]> images = propertyDao.getImagesByPropertyId(propertyId);
+            System.out.println(" So anh tim thay: " + images.size());
 
-                response.setContentType("image/jpeg");
-                response.getOutputStream().write(imgData);
+            if (images.isEmpty()) {
+                System.out.println(" khong co anh nao trong database!");
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
             }
+
+            if (imageIndex < 0 || imageIndex >= images.size()) {
+                System.out.println(" Index anh khong hop le!");
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+
+            byte[] imageData = images.get(imageIndex);
+            System.out.println(" gui anh ve client, kich thuoc: " + imageData.length + " bytes");
+
+            response.setContentType("image/jpeg");
+            response.setContentLength(imageData.length);
+
+            try (OutputStream os = response.getOutputStream()) {
+                os.write(imageData);
+                os.flush();
+            }
+
+        } catch (NumberFormatException e) {
+            System.out.println("❌ loi parse so: " + e.getMessage());
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         } catch (Exception e) {
             e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 }
-

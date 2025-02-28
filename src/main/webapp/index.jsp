@@ -3,16 +3,17 @@
 <%@ page import="java.util.List, ks.training.dto.PropertyDto" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="ks.training.service.UserService" %>
 <%
-    List<PropertyDto> properties = (List<PropertyDto>) session.getAttribute("properties");
+    List<PropertyDto> properties = (List<PropertyDto>) request.getAttribute("properties");
     if (properties == null) properties = new ArrayList<>();
+
 %>
 <%
-    Integer currentPage = (Integer) session.getAttribute("currentPage");
-    Integer totalPages = (Integer) session.getAttribute("totalPages");
+    Integer currentPage = (Integer) request.getAttribute("currentPage");
+    Integer totalPages = (Integer) request.getAttribute("totalPages");
 
-    System.out.println("DEBUG JSP - currentPage: " + currentPage);
-    System.out.println("DEBUG JSP - totalPages: " + totalPages);
+
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -162,8 +163,10 @@
         .property-image img {
             width: 150px;
             height: 100px;
-            object-fit: cover;
+            object-fit: contain;
             border-radius: 10px;
+            background-color: #f8f8f8;
+            display: block;
         }
 
         .property-info {
@@ -196,6 +199,17 @@
     User user = null;
     if (obj != null) {
         user = (User) obj;
+    }
+%>
+<%
+    String deleteMessage = (String) session.getAttribute("deleteMessage");
+    if (deleteMessage != null) {
+%>
+<div style="color: green; text-align: center; padding: 10px; background: #d4edda; border: 1px solid #c3e6cb; margin-bottom: 10px;">
+    <%= deleteMessage %>
+</div>
+<%
+        session.removeAttribute("deleteMessage");
     }
 %>
 
@@ -240,7 +254,6 @@
         </div>
         </div>
     </form>
-
     <h1>Danh Sách Bất Động Sản</h1>
 </section>
 <% for (PropertyDto property : properties) { %>
@@ -248,7 +261,8 @@
     <div class="property-list">
         <div class="property">
             <div class="property-image">
-                <img src="<%= property.getImageUrl() %>" alt="<%= property.getTitle() %>">
+                <img src="<%= request.getContextPath() %>/ImageServlet?propertyId=<%= property.getId() %>&imageIndex=<%= 0 %>"
+                     class="d-block w-100" alt="<%=property.getTitle()%>">
             </div>
             <div class="property-info">
                 <h3><%= property.getTitle() %>
@@ -263,10 +277,17 @@
                 </p>
             </div>
             <% if (user != null) { %>
-            <a href="views/PropertyInfo.jsp?id=<%= property.getId() %>">
+            <a href="views/PropertyInfo.jsp?id=<%= property.getId() %>" class="btn search-btn">
                 Xem chi Tiết
             </a>
             <% } %>
+            <% if (user != null && "Employee".equals(user.getRole())) { %>
+            <a href="<%=request.getContextPath()%>/property?id=<%=property.getId()%>&action=delete"
+               class="btn search-btn">
+                Xoá bất động sản
+            </a>
+            <% } %>
+
         </div>
 
     </div>

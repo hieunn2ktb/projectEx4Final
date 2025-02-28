@@ -39,14 +39,9 @@ public class IndexServlet extends HttpServlet {
             }
         }
 
-        System.out.println("Gia tri currentPage: " + currentPage);
-
         try {
             int totalRecords = propertyService.countProperties(minPrice, maxPrice, searchAddress, searchPropertyType);
             int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
-
-            System.out.println("Gia tri totalRecords: " + totalRecords);
-            System.out.println("Gia tri totalPages: " + totalPages);
 
             if (totalPages == 0) {
                 totalPages = 1;
@@ -54,17 +49,15 @@ public class IndexServlet extends HttpServlet {
             if (currentPage > totalPages) {
                 currentPage = totalPages;
             }
-            System.out.println("ok");
+
             List<PropertyDto> properties = propertyService.findPropertiesByPage(minPrice, maxPrice, searchAddress, searchPropertyType, currentPage, recordsPerPage);
-            System.out.println("ok 1");
-            HttpSession session = request.getSession();
-            session.setAttribute("properties", properties);
-            session.setAttribute("currentPage", currentPage);
-            session.setAttribute("totalPages", totalPages);
-            session.setAttribute("searchAddress", searchAddress);
-            session.setAttribute("searchPropertyType", searchPropertyType);
-            session.setAttribute("minPrice", minPrice);
-            session.setAttribute("maxPrice", maxPrice);
+            request.setAttribute("properties", properties);
+            request.setAttribute("currentPage", currentPage);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("searchAddress", searchAddress);
+            request.setAttribute("searchPropertyType", searchPropertyType);
+            request.setAttribute("minPrice", minPrice);
+            request.setAttribute("maxPrice", maxPrice);
 
             request.getRequestDispatcher("index.jsp").forward(request, response);
         } catch (SQLException e) {
