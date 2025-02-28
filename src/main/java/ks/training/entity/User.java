@@ -12,15 +12,6 @@ public class User {
     public User() {
     }
 
-//    public User(int id, String fullName, String email, String password, String phone, String address, String createdAt) {
-//        this.id = id;
-//        this.fullName = fullName;
-//        this.email = email;
-//        this.password = password;
-//        this.phone = phone;
-//        this.address = address;
-//        this.createdAt = createdAt;
-//    }
     public User(int id,String email,String password,String fullName,String phone,String address,String createdAt){
         this.id = id;
         this.fullName = fullName;

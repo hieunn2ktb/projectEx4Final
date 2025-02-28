@@ -49,7 +49,6 @@ public class IndexServlet extends HttpServlet {
             if (currentPage > totalPages) {
                 currentPage = totalPages;
             }
-
             List<PropertyDto> properties = propertyService.findPropertiesByPage(minPrice, maxPrice, searchAddress, searchPropertyType, currentPage, recordsPerPage);
             request.setAttribute("properties", properties);
             request.setAttribute("currentPage", currentPage);

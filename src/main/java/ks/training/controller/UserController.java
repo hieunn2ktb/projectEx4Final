@@ -7,17 +7,22 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import ks.training.dto.PropertyDto;
 import ks.training.entity.User;
+import ks.training.service.PropertyService;
 import ks.training.service.UserService;
 
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
 
 @WebServlet("/user")
 public class UserController extends HttpServlet {
     private UserService userService;
-
+    private PropertyService propertyService;
     public UserController() {
         this.userService = new UserService();
+        this.propertyService = new PropertyService();
     }
 
     @Override
@@ -52,8 +57,8 @@ public class UserController extends HttpServlet {
                     break;
                 case "Employee":
                 case "Customer":
-                    RequestDispatcher rd = getServletContext().getRequestDispatcher("/index.jsp");
-                    rd.forward(request,response);
+                    getAllList(request);
+                    request.getRequestDispatcher("index.jsp").forward(request, response);
                     break;
             }
         } else {
@@ -99,5 +104,43 @@ public class UserController extends HttpServlet {
         }
         RequestDispatcher rd = getServletContext().getRequestDispatcher(url);
         rd.forward(request,response);
+    }
+    private void getAllList(HttpServletRequest request) throws ServletException {
+        int recordsPerPage = 5;
+        int currentPage = 1;
+        String minPrice = request.getParameter("minPrice");
+        String maxPrice = request.getParameter("maxPrice");
+        String searchAddress = request.getParameter("searchAddress");
+        String searchPropertyType = request.getParameter("searchPropertyType");
+        String pageParam = request.getParameter("page");
+
+        if (pageParam != null && pageParam.matches("\\d+")) {
+            currentPage = Integer.parseInt(pageParam);
+            if (currentPage < 1) {
+                currentPage = 1;
+            }
+        }
+        try {
+            int totalRecords = propertyService.countProperties(minPrice, maxPrice, searchAddress, searchPropertyType);
+            int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+
+            if (totalPages == 0) {
+                totalPages = 1;
+            }
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+            List<PropertyDto> properties = propertyService.findPropertiesByPage(minPrice, maxPrice, searchAddress, searchPropertyType, currentPage, recordsPerPage);
+            request.setAttribute("properties", properties);
+            request.setAttribute("currentPage", currentPage);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("searchAddress", searchAddress);
+            request.setAttribute("searchPropertyType", searchPropertyType);
+            request.setAttribute("minPrice", minPrice);
+            request.setAttribute("maxPrice", maxPrice);
+
+        } catch (SQLException e) {
+            throw new ServletException("Lỗi truy vấn dữ liệu");
+        }
     }
 }

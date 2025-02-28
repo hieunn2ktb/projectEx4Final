@@ -1,13 +1,21 @@
+<%@ page import="ks.training.entity.User" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="java.sql.*" %>
-<%@ page import="javax.servlet.http.*" %>
+
 <%
+    String msg = (request.getAttribute("msg") + "");
+    msg = msg.equals("null") ? "" : msg;
     HttpSession sessionUser = request.getSession(false);
-    if (sessionUser == null || sessionUser.getAttribute("user") == null) {
+    Object obj = session.getAttribute("User");
+    User user = null;
+    if (sessionUser == null || obj == null) {
         response.sendRedirect("login.jsp");
         return;
+    }else {
+        user = (User) obj;
     }
-%>
+
+
+    %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -16,9 +24,14 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
+
 <div class="container mt-5">
     <h2 class="text-center">Thêm Bất động sản</h2>
-    <form action="AddPropertyServlet" method="post" enctype="multipart/form-data">
+    <div class="text-danger" id="msg"><%=msg%>
+    </div>
+    <form action="${pageContext.request.contextPath}/propertyMng" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="addProperty">
+        <div><input type="hidden" name="UserId" class="form-control" value="<%=user.getId()%>" required></div>
         <div class="form-group">
             <label>Tiêu đề:</label>
             <input type="text" name="title" class="form-control" required>
@@ -45,11 +58,16 @@
             </select>
         </div>
         <div class="form-group">
-            <label>Hình ảnh:</label>
-            <input type="file" name="image" class="form-control">
+            <label>Diện tích:</label>
+            <input type="text" name="acreage" class="form-control" required>
         </div>
+        <div class="form-group">
+            <label>Hình ảnh:</label>
+            <input type="file" name="images" class="form-control" multiple>
+        </div>
+
         <button type="submit" class="btn btn-primary">Thêm</button>
-        <a href="propertyList.jsp" class="btn btn-secondary">Hủy</a>
+        <a href="index.jsp" class="btn btn-secondary">Hủy</a>
     </form>
 </div>
 </body>

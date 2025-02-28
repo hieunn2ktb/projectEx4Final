@@ -3,16 +3,13 @@
 <%@ page import="java.util.List, ks.training.dto.PropertyDto" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="ks.training.service.UserService" %>
 <%
     List<PropertyDto> properties = (List<PropertyDto>) request.getAttribute("properties");
     if (properties == null) properties = new ArrayList<>();
-
 %>
 <%
     Integer currentPage = (Integer) request.getAttribute("currentPage");
     Integer totalPages = (Integer) request.getAttribute("totalPages");
-
 
 %>
 <!DOCTYPE html>
@@ -163,10 +160,8 @@
         .property-image img {
             width: 150px;
             height: 100px;
-            object-fit: contain;
+            object-fit: cover;
             border-radius: 10px;
-            background-color: #f8f8f8;
-            display: block;
         }
 
         .property-info {
@@ -199,8 +194,10 @@
     User user = null;
     if (obj != null) {
         user = (User) obj;
+
     }
 %>
+
 <%
     String deleteMessage = (String) session.getAttribute("deleteMessage");
     if (deleteMessage != null) {
@@ -212,7 +209,6 @@
         session.removeAttribute("deleteMessage");
     }
 %>
-
 <header class="navbar">
     <div class="logo">Batdongsan</div>
     <nav>
@@ -223,7 +219,12 @@
             <li><a style="while-space: nowrap;">Xin chào <%=user.getFullName()%>
             </a></li>
             <li><a href="user?action=logout" class="btn">Đăng xuất</a></li>
-            <% } %>
+            <% if ("Employee".equals(user.getRole())) { %>
+            <li><a href="property/addProperty.jsp" class="btn">Thêm Bất Động Sản</a></li>
+            <%
+                    }
+                }
+            %>
 
         </ul>
     </nav>
@@ -254,6 +255,7 @@
         </div>
         </div>
     </form>
+
     <h1>Danh Sách Bất Động Sản</h1>
 </section>
 <% for (PropertyDto property : properties) { %>
@@ -277,17 +279,15 @@
                 </p>
             </div>
             <% if (user != null) { %>
-            <a href="views/PropertyInfo.jsp?id=<%= property.getId() %>" class="btn search-btn">
+            <a href="views/PropertyInfo.jsp?id=<%= property.getId() %>" class="search-btn">
                 Xem chi Tiết
             </a>
-            <% } %>
-            <% if (user != null && "Employee".equals(user.getRole())) { %>
-            <a href="<%=request.getContextPath()%>/property?id=<%=property.getId()%>&action=delete"
-               class="btn search-btn">
-                Xoá bất động sản
+            <% if ("Employee".equals(user.getRole())) { %>
+            <a href="propertyMng?action=delete&id=<%= property.getId() %>&createBy=<%=property.getCreateBy()%>" class="search-btn">
+                Xoá Bất Động Sản
             </a>
-            <% } %>
-
+            <% }
+            } %>
         </div>
 
     </div>

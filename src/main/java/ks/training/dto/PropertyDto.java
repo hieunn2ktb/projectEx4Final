@@ -9,6 +9,7 @@ public class PropertyDto {
     private String address;
     private String propertyType;
     private int acreage;
+    private int createBy;
     private String fullName;
     private String phone;
 
@@ -29,6 +30,14 @@ public class PropertyDto {
 
     public int getId() {
         return id;
+    }
+
+    public int getCreateBy() {
+        return createBy;
+    }
+
+    public void setCreateBy(int createBy) {
+        this.createBy = createBy;
     }
 
     public void setId(int id) {

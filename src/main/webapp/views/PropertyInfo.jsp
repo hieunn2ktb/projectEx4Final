@@ -108,7 +108,6 @@
             </div>
             <button class="btn btn-custom">Đặt Cọc</button>
             <button class="btn btn-custom">Mua</button>
-            <button class="btn btn-custom">Quay lại</button>
         </div>
         <% }%>
     </div>

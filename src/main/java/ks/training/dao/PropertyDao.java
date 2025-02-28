@@ -1,11 +1,11 @@
 package ks.training.dao;
 
 import ks.training.dto.PropertyDto;
+import ks.training.dto.PropertyResponse;
 import ks.training.entity.Property;
-import ks.training.exception.RecordNotFoundException;
 import ks.training.utils.DatabaseConnection;
 
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ public class PropertyDao {
     public List<PropertyDto> findPropertiesByPage(String minPrice, String maxPrice, String searchAddress, String searchPropertyType, int page, int pageSize) throws SQLException {
         int offset = (page - 1) * pageSize;
         String sql = "SELECT p.id, p.image_url, p.title, p.price, p.description, \n" +
-                "                p.address, p.property_type, p.acreage, u.full_name, u.phone\n" +
+                "                p.address, p.property_type, p.acreage, u.full_name, u.phone, p.created_by\n" +
                 "                FROM properties p \n" +
                 "                JOIN users u ON p.created_by = u.id WHERE 1=1";
         List<Object> params = new ArrayList<>();
@@ -62,6 +62,7 @@ public class PropertyDao {
                     propertyDto.setAcreage(rs.getInt("acreage"));
                     propertyDto.setFullName(rs.getString("full_name"));
                     propertyDto.setPhone(rs.getString("phone"));
+                    propertyDto.setCreateBy(rs.getInt("created_by"));
                     propertyDtos.add(propertyDto);
                 }
             }
@@ -109,10 +110,11 @@ public class PropertyDao {
     }
 
 
-    public void addProperty(Connection conn, Property property) {
+    public void addProperty(Connection conn, PropertyResponse property) {
         String sql = "INSERT INTO properties (title, description, price, address, property_type, acreage, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String uploadImage = "INSERT INTO property_images (property_id, image_data) VALUES (?, ?)";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, property.getTitle());
             pstmt.setString(2, property.getDescription());
             pstmt.setDouble(3, property.getPrice());
@@ -121,13 +123,29 @@ public class PropertyDao {
             pstmt.setDouble(6, property.getAcreage());
             pstmt.setInt(7, property.getCreatedBy());
 
-            pstmt.executeUpdate();
-            System.out.println("Thêm bất động sản thành công!");
+            int affectedRows = pstmt.executeUpdate();
+            List<InputStream> imageStreams = property.getImageStreams();
+
+            if (affectedRows > 0) {
+                try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        int propertyId = rs.getInt(1);
+                        if (imageStreams != null && !imageStreams.isEmpty()) {
+                            for (InputStream imageStream : imageStreams) {
+                                try (PreparedStatement stmt = conn.prepareStatement(uploadImage)) {
+                                    stmt.setInt(1, propertyId);
+                                    stmt.setBlob(2, imageStream);
+                                    stmt.executeUpdate();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-
 
     public void updateProperty(Connection conn, Property property) {
         String sql = "UPDATE properties SET title=?, description=?, price=?, address=?, property_type=?, acreage=? WHERE id=?";
@@ -181,7 +199,6 @@ public class PropertyDao {
         return rowsDeleted;
     }
 
-
     public Property findPropertyById(int id) {
         String sql = "SELECT * FROM properties WHERE id = ?";
         Property property = null;
@@ -207,6 +224,7 @@ public class PropertyDao {
         }
         return property;
     }
+
     public List<byte[]> getImagesByPropertyId(int propertyId) {
         List<byte[]> images = new ArrayList<>();
         String sql = "SELECT image_data FROM property_images WHERE property_id = ?";
@@ -218,11 +236,32 @@ public class PropertyDao {
             while (rs.next()) {
                 images.add(rs.getBytes("image_data"));
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return images;
+    }
+
+    public boolean checkUser(int userId, int propertyId) {
+        String sql = "SELECT COUNT(*) FROM properties WHERE id = ? AND created_by = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, propertyId);
+            pstmt.setInt(2, userId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0; // Nếu COUNT(*) > 0, tức là user là chủ sở hữu
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }
 

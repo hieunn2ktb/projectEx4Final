@@ -2,15 +2,18 @@ package ks.training.service;
 
 import ks.training.dao.PropertyDao;
 import ks.training.dto.PropertyDto;
+import ks.training.dto.PropertyResponse;
 import ks.training.entity.Property;
 import ks.training.utils.DatabaseConnection;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
 public class PropertyService {
     private final PropertyDao propertyDao;
+
 
     public PropertyService() {
         this.propertyDao = new PropertyDao();
@@ -24,21 +27,25 @@ public class PropertyService {
         return propertyDao.countProperties(minPrice, maxPrice, searchAddress, searchPropertyType);
     }
 
-    public void addProperty(Property property) {
+    public boolean addProperty(PropertyResponse property) {
+        boolean isSuccess = false;
         try (Connection conn = DatabaseConnection.getConnection()) {
             conn.setAutoCommit(false);
             try {
                 propertyDao.addProperty(conn, property);
-                propertyDao.addProperty(conn, property);
                 conn.commit();
+                isSuccess = true;
             } catch (SQLException e) {
                 conn.rollback();
-                throw e;
+                e.printStackTrace();
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        return isSuccess;
     }
+
 
     public Property findPropertyById(int id) {
         return propertyDao.findPropertyById(id);
@@ -79,5 +86,7 @@ public class PropertyService {
         }
         return rowsAffected;
     }
-
+    public boolean checkUser(int userId, int propertyId){
+        return propertyDao.checkUser( userId, propertyId);
+    };
 }
