@@ -5,6 +5,7 @@ import ks.training.dto.PropertyResponse;
 import ks.training.entity.Property;
 import ks.training.utils.DatabaseConnection;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
 import java.util.ArrayList;
@@ -147,28 +148,49 @@ public class PropertyDao {
         }
     }
 
-    public void updateProperty(Connection conn, Property property) {
-        String sql = "UPDATE properties SET title=?, description=?, price=?, address=?, property_type=?, acreage=? WHERE id=?";
+    public boolean updateProperty(Connection conn, PropertyResponse property) {
+        String updatePropertySQL = "UPDATE properties SET title = ?, description = ?, price = ?, address = ?, property_type = ?, acreage = ? WHERE id = ?";
+        String deleteImagesSQL = "DELETE FROM property_images WHERE property_id = ?";
+        String insertImageSQL = "INSERT INTO property_images (property_id, image_data) VALUES (?, ?)";
 
-        try (
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, property.getTitle());
-            pstmt.setString(2, property.getDescription());
-            pstmt.setDouble(3, property.getPrice());
-            pstmt.setString(4, property.getAddress());
-            pstmt.setString(5, property.getPropertyType());
-            pstmt.setDouble(6, property.getAcreage());
-            pstmt.setInt(7, property.getId());
+        try {
+            try (PreparedStatement pstmt = conn.prepareStatement(updatePropertySQL)) {
+                pstmt.setString(1, property.getTitle());
+                pstmt.setString(2, property.getDescription());
+                pstmt.setDouble(3, property.getPrice());
+                pstmt.setString(4, property.getAddress());
+                pstmt.setString(5, property.getPropertyType());
+                pstmt.setDouble(6, property.getAcreage());
+                pstmt.setInt(7, property.getId());
 
-            int rowsUpdated = pstmt.executeUpdate();
-            if (rowsUpdated > 0) {
-                System.out.println("Cập nhật bất động sản thành công!");
-            } else {
-                System.out.println("Không tìm thấy bất động sản để cập nhật!");
+                int affectedRows = pstmt.executeUpdate();
+                if (affectedRows == 0) {
+                    return false;
+                }
             }
+            List<InputStream> imageStreams = property.getImageStreams();
+            if (imageStreams != null && !imageStreams.isEmpty()) {
+                try (PreparedStatement deleteStmt = conn.prepareStatement(deleteImagesSQL)) {
+                    deleteStmt.setInt(1, property.getId());
+                    deleteStmt.executeUpdate();
+                }
+
+                try (PreparedStatement insertStmt = conn.prepareStatement(insertImageSQL)) {
+                    for (InputStream imageStream : imageStreams) {
+                        insertStmt.setInt(1, property.getId());
+                        insertStmt.setBlob(2, imageStream);
+                        insertStmt.executeUpdate();
+                        imageStream.close();
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     public boolean checkTransactionSQL(int id) {
@@ -263,6 +285,8 @@ public class PropertyDao {
 
         return false;
     }
+
+
 }
 
 

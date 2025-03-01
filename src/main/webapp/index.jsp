@@ -286,6 +286,9 @@
             <a href="propertyMng?action=delete&id=<%= property.getId() %>&createBy=<%=property.getCreateBy()%>" class="search-btn">
                 Xoá Bất Động Sản
             </a>
+            <a href="property/editProperty.jsp?propertyId=<%= property.getId() %>" class="search-btn">
+                Update Bất Động Sản
+            </a>
             <% }
             } %>
         </div>

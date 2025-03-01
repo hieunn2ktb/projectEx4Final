@@ -39,6 +39,9 @@ public class PropertyController extends HttpServlet {
             case "addProperty":
                 addProperty(req, resp);
                 break;
+            case "edit":
+                updateProperty(req, resp);
+                break;
             default:
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Hành động không hợp lệ");
                 break;
@@ -116,6 +119,57 @@ public class PropertyController extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi xử lý yêu cầu!");
         }
     }
+    private void updateProperty(HttpServletRequest request, HttpServletResponse resp) throws IOException {
+        System.out.println("da goi den pt update");
+        try {
+            if (!request.getContentType().toLowerCase().startsWith("multipart/")) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request không hỗ trợ multipart");
+                return;
+            }
+
+            int propertyId = Integer.parseInt(request.getParameter("propertyId"));
+            String title = request.getParameter("title");
+            String description = request.getParameter("description");
+            String address = request.getParameter("address");
+            String propertyType = request.getParameter("property_type");
+
+
+            double price = Double.parseDouble(request.getParameter("price"));
+            double acreage = Double.parseDouble(request.getParameter("acreage"));
+
+            Collection<Part> fileParts = request.getParts();
+            List<InputStream> imageStreams = new ArrayList<>();
+
+            for (Part part : fileParts) {
+                if ("images".equals(part.getName()) && part.getSize() > 0) {
+                    imageStreams.add(part.getInputStream());
+                }
+            }
+
+            PropertyResponse propertyResponse = new PropertyResponse();
+            propertyResponse.setId(propertyId);
+            propertyResponse.setTitle(title);
+            propertyResponse.setDescription(description);
+            propertyResponse.setAddress(address);
+            propertyResponse.setPrice(price);
+            propertyResponse.setPropertyType(propertyType);
+            propertyResponse.setAcreage(acreage);
+            propertyResponse.setImageStreams(imageStreams);
+
+            boolean isSuccess = propertyService.updateProperty(propertyResponse);
+            String msg = isSuccess ? "Update thành công bất động sản" : "Update thất bại";
+            request.setAttribute("msg", msg);
+
+            RequestDispatcher rd = getServletContext().getRequestDispatcher("/property/editProperty.jsp");
+            rd.forward(request, resp);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi xử lý yêu cầu!");
+        }
+    }
+
+
+
     private void getAllList(HttpServletRequest request) throws ServletException {
         int recordsPerPage = 5;
         int currentPage = 1;

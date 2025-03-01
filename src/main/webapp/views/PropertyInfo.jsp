@@ -75,7 +75,7 @@
                 <div class="carousel-inner">
                     <% for (int i = 0; i < images.size(); i++) { %>
                     <div class="carousel-item <%= i == 0 ? "active" : "" %>">
-                        <img src="<%= request.getContextPath() %>/ImageServlet?propertyId=<%= propertyId %>&imageIndex=<%= i %>" class="d-block w-100" alt="<%=property.getTitle()%>">
+                        <img src="<%= request.getContextPath() %>/ImageServlet?propertyId=<%= propertyId %>&imageIndex=<%= i %>" class="d-block w-75 mx-auto" alt="<%=property.getTitle()%>">
                     </div>
                     <% } %>
                 </div>

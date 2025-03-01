@@ -14,7 +14,6 @@
         user = (User) obj;
     }
 
-
     %>
 <!DOCTYPE html>
 <html lang="vi">

@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.util.List;
 
 public class PropertyResponse {
-
+    private int id;
     private String title;
     private String description;
     private double price;
@@ -20,6 +20,14 @@ public class PropertyResponse {
 
     public List<InputStream> getImageStreams() {
         return imageStreams;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void setImageStreams(List<InputStream> imageStreams) {
@@ -81,5 +89,20 @@ public class PropertyResponse {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    @Override
+    public String toString() {
+        return "PropertyResponse{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", price=" + price +
+                ", address='" + address + '\'' +
+                ", propertyType='" + propertyType + '\'' +
+                ", acreage=" + acreage +
+                ", createdBy=" + createdBy +
+                ", imageStreams=" + imageStreams +
+                '}';
     }
 }

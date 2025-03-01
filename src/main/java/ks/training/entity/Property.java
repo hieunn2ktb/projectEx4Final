@@ -12,8 +12,7 @@ public class Property {
     private int createdBy;
     private String createdAt;
     private int acreage;
-    private String img;
-    private List<String> images;
+
     public Property() {
     }
 
@@ -29,22 +28,6 @@ public class Property {
         this.acreage = acreage;
     }
 
-    public List<String> getImages() {
-        return images;
-    }
-
-
-    public void setImages(List<String> images) {
-        this.images = images;
-    }
-
-    public String getImg() {
-        return img;
-    }
-
-    public void setImg(String img) {
-        this.img = img;
-    }
 
     public double getAcreage() {
         return acreage;

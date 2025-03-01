@@ -51,20 +51,28 @@ public class PropertyService {
         return propertyDao.findPropertyById(id);
     }
 
-    public void updateProperty(Property property) {
+    public boolean updateProperty(PropertyResponse property) {
+        boolean result = false;
         try (Connection conn = DatabaseConnection.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                propertyDao.updateProperty(conn, property);
+                boolean updated = propertyDao.updateProperty(conn, property);
+                if (!updated) {
+                    conn.rollback();
+                    return false;
+                }
                 conn.commit();
+                result = true;
             } catch (SQLException e) {
                 conn.rollback();
-                throw e;
+                throw new RuntimeException("Lỗi khi cập nhật BĐS", e);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return result;
     }
+
 
     public boolean checkTransactionSQL(int id) {
         return propertyDao.checkTransactionSQL(id);
