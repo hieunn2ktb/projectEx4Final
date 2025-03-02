@@ -214,11 +214,12 @@
     <nav>
         <ul>
             <% if (user == null) { %>
-            <li><a href="login.jsp" class="btn">Đăng Nhập</a></li>
+            <li><a href="user/login.jsp" class="btn">Đăng Nhập</a></li>
             <% } else { %>
             <li><a style="while-space: nowrap;">Xin chào <%=user.getFullName()%>
             </a></li>
-            <li><a href="user?action=logout" class="btn">Đăng xuất</a></li>
+            <li><a href="?action=logout" class="btn">Đăng xuất</a></li>
+            <li><a href="user/editUser.jsp" class="btn">Thay đổi thông tin</a></li>
             <% if ("Employee".equals(user.getRole())) { %>
             <li><a href="property/addProperty.jsp" class="btn">Thêm Bất Động Sản</a></li>
             <%
@@ -279,7 +280,7 @@
                 </p>
             </div>
             <% if (user != null) { %>
-            <a href="views/PropertyInfo.jsp?id=<%= property.getId() %>" class="search-btn">
+            <a href="property/PropertyInfo.jsp?id=<%= property.getId() %>" class="search-btn">
                 Xem chi Tiết
             </a>
             <% if ("Employee".equals(user.getRole())) { %>

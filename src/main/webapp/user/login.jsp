@@ -129,7 +129,7 @@
 
     <div class="text-center"><span style="color: red"><%=error%></span></div>
 
-    <form action="user" method="post">
+    <form action="${pageContext.request.contextPath}/user" method="post">
         <input type="hidden" name="action" value="login">
         <div class="input-group">
             <label>Email</label>

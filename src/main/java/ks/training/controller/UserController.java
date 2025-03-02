@@ -7,8 +7,10 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import ks.training.dao.CustomerActivityDao;
 import ks.training.dto.PropertyDto;
 import ks.training.entity.User;
+import ks.training.service.CustomerActivityService;
 import ks.training.service.PropertyService;
 import ks.training.service.UserService;
 
@@ -20,9 +22,11 @@ import java.util.List;
 public class UserController extends HttpServlet {
     private UserService userService;
     private PropertyService propertyService;
+
     public UserController() {
         this.userService = new UserService();
         this.propertyService = new PropertyService();
+
     }
 
     @Override
@@ -32,14 +36,62 @@ public class UserController extends HttpServlet {
             login(request, response);
         } else if (action.equals("logout")) {
             logout(request, response);
-        }else if (action.equals("register")) {
+        } else if (action.equals("register")) {
             register(request, response);
+        } else if (action.equals("edit")) {
+            editUser(request, response);
         }
     }
+
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         doGet(request, response);
     }
+
+    private void editUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String fullName = request.getParameter("fullName");
+        String address = request.getParameter("address");
+        String phone = request.getParameter("phone");
+        String password = request.getParameter("password");
+        String rePassword = request.getParameter("rePassword");
+
+        request.setAttribute("fullName", fullName);
+        request.setAttribute("address", address);
+        request.setAttribute("phone", phone);
+
+        String url = "";
+        String msgError = "";
+
+        request.setAttribute("msgError", msgError);
+        boolean isUpdated = false;
+
+        Object obj = request.getSession().getAttribute("User");
+        User user = (obj instanceof User) ? (User) obj : null;
+
+        if (user != null) {
+            user.setFullName(fullName);
+            user.setAddress(address);
+            user.setPhone(phone);
+            if (password.equals(rePassword)) {
+                isUpdated  = userService.updateUser(user.getId(), fullName, password, phone, address);
+                if (isUpdated) {
+                    request.getSession().setAttribute("User", user);
+                    msgError = "Cập nhật thành công!";
+                    request.setAttribute("msgError", msgError);
+                    url = "/user/editUser.jsp";
+                } else {
+                    msgError = "Cập nhật không thành công!";
+                    request.setAttribute("msgError", msgError);
+                    url = "/user/editUser.jsp";
+                }
+            }
+        }
+
+        RequestDispatcher rd = getServletContext().getRequestDispatcher(url);
+        rd.forward(request, response);
+    }
+
 
     private void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String email = request.getParameter("email");
@@ -62,17 +114,19 @@ public class UserController extends HttpServlet {
                     break;
             }
         } else {
-            request.setAttribute("error","Email hoặc mật khẩu không chính xác");
-            RequestDispatcher rd = getServletContext().getRequestDispatcher("/login.jsp");
-            rd.forward(request,response);
+            request.setAttribute("error", "Email hoặc mật khẩu không chính xác");
+            RequestDispatcher rd = getServletContext().getRequestDispatcher("/user/login.jsp");
+            rd.forward(request, response);
         }
     }
-    private void logout(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+
+    private void logout(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         session.invalidate();
-        response.sendRedirect("login.jsp");
+        response.sendRedirect("user/login.jsp");
     }
-    private void register(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+
+    private void register(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String email = request.getParameter("email");
         String password = request.getParameter("psw");
         String fullName = request.getParameter("fullName");
@@ -97,14 +151,15 @@ public class UserController extends HttpServlet {
         request.setAttribute("error", msgError);
 
         if (!msgError.isEmpty()) {
-            url = "/register.jsp";
+            url = "/user/register.jsp";
         } else {
             userService.register(email, password, fullName, phone, address);
             url = "/views/thanhcong.jsp";
         }
         RequestDispatcher rd = getServletContext().getRequestDispatcher(url);
-        rd.forward(request,response);
+        rd.forward(request, response);
     }
+
     private void getAllList(HttpServletRequest request) throws ServletException {
         int recordsPerPage = 5;
         int currentPage = 1;

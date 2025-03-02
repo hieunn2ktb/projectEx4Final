@@ -33,7 +33,7 @@
         <div class="text-danger" id="error"><%=error%>
         </div>
     </div>
-    <form action="user" method="post" >
+    <form action="${pageContext.request.contextPath}/user" method="post" >
         <input type="hidden" name="action" value="register">
         <div class="mb-3">
             <label for="fullName"><b>Full Name</b></label>

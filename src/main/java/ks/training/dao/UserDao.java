@@ -105,7 +105,7 @@ public class UserDao {
         User user = null;
         try (Connection conn = DatabaseConnection.getConnection()) {
 
-            String sql = "SELECT u.id, u.full_name, u.email, u.password, r.name AS role FROM users u " +
+            String sql = "SELECT u.id, u.full_name, u.email, u.password,u.phone,u.address, r.name AS role FROM users u " +
                     "JOIN user_roles ur ON u.id = ur.user_id " +
                     "JOIN roles r ON ur.role_id = r.id " +
                     "WHERE u.email = ?";
@@ -121,7 +121,10 @@ public class UserDao {
                     user.setId(rs.getInt("id"));
                     user.setFullName(rs.getString("full_name"));
                     user.setEmail(rs.getString("email"));
+                    user.setPhone(rs.getString("phone"));
+                    user.setAddress(rs.getString("address"));
                     user.setRole(rs.getString("role"));
+
                 }
             }
         } catch (Exception e) {
@@ -129,5 +132,28 @@ public class UserDao {
         }
         return user;
     }
+
+    public boolean updateUser(Connection connection, int id, String fullName, String password, String phone, String address) {
+        String sql = "UPDATE users SET full_name = ?, phone = ?, address = ? , password = ? WHERE id = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt(12));
+
+            stmt.setString(1, fullName);
+            stmt.setString(2, phone);
+            stmt.setString(3, address);
+            stmt.setString(4, hashedPassword);
+            stmt.setInt(5, id);
+
+            int rowsUpdated = stmt.executeUpdate();
+            return rowsUpdated > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
 
 }

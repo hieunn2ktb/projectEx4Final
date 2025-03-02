@@ -266,7 +266,7 @@
                 </p>
             </div>
             <% if (user != null) { %>
-            <a href="views/PropertyInfo.jsp?id=<%= property.getId() %>">
+            <a href="property/PropertyInfo.jsp?id=<%= property.getId() %>">
                 Chỉnh sửa
             </a>
             <a href="<%=request.getContextPath()%>/property?id=<%=property.getId()%>&action=delete<%= property.getId()%>">

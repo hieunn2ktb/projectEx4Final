@@ -37,4 +37,22 @@ public class UserService {
     public User validateUser(String email, String password){
         return userDao.validateUser(email,password);
     }
+    public boolean updateUser(int id, String fullName, String password, String phone, String address){
+       boolean result = false;
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                userDao.updateUser(conn, id, fullName, password, phone, address);
+                conn.commit();
+                result = true;
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
 }

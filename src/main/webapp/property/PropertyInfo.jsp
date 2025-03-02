@@ -2,6 +2,8 @@
 <%@ page import="ks.training.entity.Property" %>
 <%@ page import="ks.training.dao.PropertyDao" %>
 <%@ page import="java.util.List" %>
+<%@ page import="ks.training.entity.User" %>
+<%@ page import="ks.training.service.CustomerActivityService" %>
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 
 <%
@@ -16,7 +18,13 @@
     }
 %>
 <%
-    System.out.println(propertyId);
+    Object obj = session.getAttribute("User");
+    User user = null;
+    CustomerActivityService customerActivityService = new CustomerActivityService();
+    if (obj != null) {
+        user = (User) obj;
+        customerActivityService.logCustomerActivity(user.getId(), propertyId);
+    }
     PropertyService propertyService = new PropertyService();
     Property property = propertyService.findPropertyById(propertyId);
     PropertyDao propertyDao = new PropertyDao();
@@ -75,7 +83,8 @@
                 <div class="carousel-inner">
                     <% for (int i = 0; i < images.size(); i++) { %>
                     <div class="carousel-item <%= i == 0 ? "active" : "" %>">
-                        <img src="<%= request.getContextPath() %>/ImageServlet?propertyId=<%= propertyId %>&imageIndex=<%= i %>" class="d-block w-75 mx-auto" alt="<%=property.getTitle()%>">
+                        <img src="<%= request.getContextPath() %>/ImageServlet?propertyId=<%= propertyId %>&imageIndex=<%= i %>"
+                             class="d-block w-75 mx-auto" alt="<%=property.getTitle()%>">
                     </div>
                     <% } %>
                 </div>
@@ -106,7 +115,7 @@
             <div class="alert alert-success" role="alert">
                 <strong>⬆ 75%</strong> Giá tại khu vực này đã tăng trong vòng 1 năm qua.
             </div>
-            <button class="btn btn-custom">Đặt Cọc</button>
+            <a  class="btn btn-custom" href="${pageContext.request.contextPath}/transaction/confirm-transaction.jsp">Đặt Cọc</a>
             <button class="btn btn-custom">Mua</button>
         </div>
         <% }%>

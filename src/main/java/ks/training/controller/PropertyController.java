@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import ks.training.dto.PropertyDto;
 import ks.training.dto.PropertyResponse;
+import ks.training.service.CustomerActivityService;
 import ks.training.service.PropertyService;
 
 import java.io.IOException;
@@ -20,9 +21,11 @@ import java.util.List;
 @MultipartConfig(maxFileSize = 1024 * 1024 * 5)
 public class PropertyController extends HttpServlet {
     private PropertyService propertyService;
+    private CustomerActivityService customerActivityService;
 
     public PropertyController() {
         this.propertyService = new PropertyService();
+        this.customerActivityService = new CustomerActivityService();
     }
 
     @Override
