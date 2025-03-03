@@ -1,7 +1,6 @@
 package ks.training.dto;
 
 public class TransactionDto {
-
     private String title;
     private double price;
     private String address;

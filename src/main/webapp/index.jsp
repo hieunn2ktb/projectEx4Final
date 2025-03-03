@@ -190,11 +190,13 @@
 
 <body>
 <%
+
     Object obj = session.getAttribute("User");
     User user = null;
     if (obj != null) {
         user = (User) obj;
-
+        session.setAttribute("role", user.getRole());
+        System.out.println(user.getRole());
     }
 %>
 
@@ -222,6 +224,8 @@
             <li><a href="user/editUser.jsp" class="btn">Thay đổi thông tin</a></li>
             <% if ("Employee".equals(user.getRole())) { %>
             <li><a href="property/addProperty.jsp" class="btn">Thêm Bất Động Sản</a></li>
+            <li><a href="transaction?action=allTransaction" class="btn">Quản lý giao dịch</a></li>
+            <li><a href="report/reports.jsp" class="btn">Báo cáo giao dịch</a></li>
             <%
                     }
                 }
@@ -253,7 +257,6 @@
                 <input type="number" id="max-price" name="maxPrice" placeholder="Đến (USD)">
             </div>
             <button class="search-btn">Tìm kiếm</button>
-        </div>
         </div>
     </form>
 

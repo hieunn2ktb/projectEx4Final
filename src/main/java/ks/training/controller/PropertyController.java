@@ -21,11 +21,9 @@ import java.util.List;
 @MultipartConfig(maxFileSize = 1024 * 1024 * 5)
 public class PropertyController extends HttpServlet {
     private PropertyService propertyService;
-    private CustomerActivityService customerActivityService;
 
     public PropertyController() {
         this.propertyService = new PropertyService();
-        this.customerActivityService = new CustomerActivityService();
     }
 
     @Override

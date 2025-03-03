@@ -68,7 +68,14 @@
         }
     </style>
 </head>
-
+<%
+    HttpSession sessionUser = request.getSession(false);
+    Object obj = session.getAttribute("User");
+    if (sessionUser == null || obj == null) {
+        response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+        return;
+    }
+%>
 <body>
 
 <% if (session.getAttribute("errorMessage") !=null) { %>

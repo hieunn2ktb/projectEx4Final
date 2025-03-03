@@ -7,6 +7,13 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 
 <%
+    HttpSession sessionUser = request.getSession(false);
+    Object obj = session.getAttribute("User");
+    User user = null;
+    if (sessionUser == null || obj == null) {
+        response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+        return;
+    }
     String propertyIdStr = request.getParameter("id");
     int propertyId = 0;
     if (propertyIdStr != null) {
@@ -115,8 +122,8 @@
             <div class="alert alert-success" role="alert">
                 <strong>⬆ 75%</strong> Giá tại khu vực này đã tăng trong vòng 1 năm qua.
             </div>
-            <a  class="btn btn-custom" href="${pageContext.request.contextPath}/transaction/confirm-transaction.jsp">Đặt Cọc</a>
-            <button class="btn btn-custom">Mua</button>
+            <a  class="btn btn-custom" href="${pageContext.request.contextPath}/transaction/confirm-transaction.jsp?propertyId=<%=property.getId()%>&buyerId=<%=user.getId()%>&type=Đặt Cọc">Đặt Cọc</a>
+            <a class="btn btn-custom" href="${pageContext.request.contextPath}/transaction/confirm-transaction.jsp?propertyId=<%=property.getId()%>&buyerId=<%=user.getId()%>&type=Mua">Mua</a>
         </div>
         <% }%>
     </div>

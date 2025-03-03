@@ -23,10 +23,17 @@
     </style>
 </head>
 
+
+
 <body>
-<% Object obj = session.getAttribute("User");
+<%
     User user = null;
-    if (obj != null) {
+    HttpSession sessionUser = request.getSession(false);
+    Object obj = session.getAttribute("User");
+    if (sessionUser == null || obj == null) {
+        response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+        return;
+    } else {
         user = (User) obj;
 
     }
@@ -71,17 +78,19 @@
                 </div>
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" value="<%= user.getEmail() %>" readonly>
+                    <input type="email" class="form-control" id="email" name="email" value="<%= user.getEmail() %>"
+                           readonly>
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">password</label> <input type="password"
-                                                                                    class="form-control" id="password"
-                                                                                    name="password">
+                                                                                     class="form-control" id="password"
+                                                                                     name="password">
                 </div>
                 <div class="mb-3">
                     <label for="rePassword" class="form-label">Re-password</label> <input type="password"
-                                                                                  class="form-control" id="rePassword"
-                                                                                  name="rePassword">
+                                                                                          class="form-control"
+                                                                                          id="rePassword"
+                                                                                          name="rePassword">
                 </div>
 
                 <hr/>

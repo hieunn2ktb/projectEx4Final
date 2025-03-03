@@ -8,7 +8,7 @@
     Object obj = session.getAttribute("User");
     User user = null;
     if (sessionUser == null || obj == null) {
-        response.sendRedirect("login.jsp");
+        response.sendRedirect(request.getContextPath() + "/user/login.jsp");
         return;
     }else {
         user = (User) obj;

@@ -1,3 +1,4 @@
+<%@ page import="ks.training.entity.User" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -10,6 +11,15 @@
         a { display: block; margin-top: 20px; text-decoration: none; color: blue; }
     </style>
 </head>
+<%
+    HttpSession sessionUser = request.getSession(false);
+    Object obj = session.getAttribute("User");
+    User user = null;
+    if (sessionUser == null || obj == null) {
+        response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+        return;
+    }
+%>
 <body>
 <p class="success">🎉 Giao dịch đã được tạo thành công!</p>
 <a href="index.jsp">Quay lại Trang chủ</a>

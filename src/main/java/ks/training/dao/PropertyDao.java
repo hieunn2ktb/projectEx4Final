@@ -16,9 +16,11 @@ public class PropertyDao {
     public List<PropertyDto> findPropertiesByPage(String minPrice, String maxPrice, String searchAddress, String searchPropertyType, int page, int pageSize) throws SQLException {
         int offset = (page - 1) * pageSize;
         String sql = "SELECT p.id, p.image_url, p.title, p.price, p.description, \n" +
-                "                p.address, p.property_type, p.acreage, u.full_name, u.phone, p.created_by\n" +
-                "                FROM properties p \n" +
-                "                JOIN users u ON p.created_by = u.id WHERE 1=1";
+                "       p.address, p.property_type, p.acreage, u.full_name, u.phone, p.created_by\n" +
+                "FROM properties p\n" +
+                "JOIN users u ON p.created_by = u.id\n" +
+                "LEFT JOIN transactions t ON p.id = t.property_id\n" +
+                "WHERE t.property_id IS NULL ";
         List<Object> params = new ArrayList<>();
 
         if (minPrice != null && maxPrice != null && !minPrice.isEmpty() && !maxPrice.isEmpty()) {
