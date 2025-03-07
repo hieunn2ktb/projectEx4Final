@@ -25,8 +25,6 @@
     }
 %>
 <%
-    Object obj = session.getAttribute("User");
-    User user = null;
     CustomerActivityService customerActivityService = new CustomerActivityService();
     if (obj != null) {
         user = (User) obj;
@@ -122,10 +120,19 @@
             <div class="alert alert-success" role="alert">
                 <strong>⬆ 75%</strong> Giá tại khu vực này đã tăng trong vòng 1 năm qua.
             </div>
-            <a  class="btn btn-custom" href="${pageContext.request.contextPath}/transaction/confirm-transaction.jsp?propertyId=<%=property.getId()%>&buyerId=<%=user.getId()%>&type=Đặt Cọc">Đặt Cọc</a>
-            <a class="btn btn-custom" href="${pageContext.request.contextPath}/transaction/confirm-transaction.jsp?propertyId=<%=property.getId()%>&buyerId=<%=user.getId()%>&type=Mua">Mua</a>
+            <%
+                if (user != null) {
+                    if (user.getRole().equals("Customer")) {
+            %>
+            <a class="btn btn-custom"
+               href="${pageContext.request.contextPath}/transaction/confirm-transaction.jsp?propertyId=<%=property.getId()%>&buyerId=<%=user.getId()%>&type=Đặt Cọc">Đặt
+                Cọc</a>
+            <a class="btn btn-custom"
+               href="${pageContext.request.contextPath}/transaction/confirm-transaction.jsp?propertyId=<%=property.getId()%>&buyerId=<%=user.getId()%>&type=Mua">Mua</a>
         </div>
-        <% }%>
+        <% }
+        }
+        }%>
     </div>
 </div>
 

@@ -226,6 +226,7 @@
             <li><a href="property/addProperty.jsp" class="btn">Thêm Bất Động Sản</a></li>
             <li><a href="transaction?action=allTransaction" class="btn">Quản lý giao dịch</a></li>
             <li><a href="report/reports.jsp" class="btn">Báo cáo giao dịch</a></li>
+            <li><a href="transaction/viewHistory.jsp" class="btn">Lịch sử bds khách hàng đã xem</a></li>
             <%
                     }
                 }

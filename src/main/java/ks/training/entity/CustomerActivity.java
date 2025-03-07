@@ -1,3 +1,5 @@
+package ks.training.entity;
+
 public class CustomerActivity {
     private int id;
     private int customerId;
