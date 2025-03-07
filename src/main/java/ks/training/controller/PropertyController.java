@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import ks.training.dto.PropertyDto;
 import ks.training.dto.PropertyResponse;
+import ks.training.entity.User;
 import ks.training.service.CustomerActivityService;
 import ks.training.service.PropertyService;
 
@@ -75,13 +76,20 @@ public class PropertyController extends HttpServlet {
         request.getRequestDispatcher("index.jsp").forward(request, resp);
     }
     private void addProperty(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        User user = (session != null) ? (User) session.getAttribute("User") : null;
+
+        if (user == null) {
+            resp.sendRedirect(request.getContextPath() + "/user/login.jsp");
+            return;
+        }
+
         try {
             if (!request.getContentType().toLowerCase().startsWith("multipart/")) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request không hỗ trợ multipart");
                 return;
             }
 
-            int userId = Integer.parseInt(request.getParameter("UserId"));
             String title = request.getParameter("title");
             String description = request.getParameter("description");
             String address = request.getParameter("address");
@@ -107,7 +115,7 @@ public class PropertyController extends HttpServlet {
             propertyResponse.setPropertyType(propertyType);
             propertyResponse.setAcreage(acreage);
             propertyResponse.setImageStreams(imageStreams);
-            propertyResponse.setCreatedBy(userId);
+            propertyResponse.setCreatedBy(user.getId());
 
             boolean isSuccess = propertyService.addProperty(propertyResponse);
             String msg = isSuccess ? "Thêm thành công bất động sản" : "Thêm thất bại";

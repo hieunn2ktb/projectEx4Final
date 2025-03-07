@@ -6,7 +6,11 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import ks.training.dto.HistoryViewDto;
 import ks.training.dto.TransactionResponseDto;
+import ks.training.entity.User;
+import ks.training.service.CustomerActivityService;
 import ks.training.service.EmailService;
 import ks.training.service.TransactionService;
 
@@ -17,9 +21,10 @@ import java.util.List;
 @WebServlet("/transaction")
 public class TransactionController extends HttpServlet {
     private TransactionService transactionService;
-
+    private CustomerActivityService customerActivityService;
     public TransactionController() {
         this.transactionService = new TransactionService();
+        this.customerActivityService = new CustomerActivityService();
     }
 
     @Override
@@ -38,6 +43,9 @@ public class TransactionController extends HttpServlet {
                 break;
             case "updateStatus":
                 updateStatusTransaction(req, resp);
+                break;
+            case "viewHistory":
+                historyView(req, resp);
                 break;
             default:
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Hành động không hợp lệ");
@@ -131,6 +139,19 @@ public class TransactionController extends HttpServlet {
             throw new RuntimeException(e);
         }
 
+    }
+    private void historyView(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        HttpSession session = request.getSession(false);
+        User user = (session != null) ? (User) session.getAttribute("User") : null;
+
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+            return;
+        }
+
+        List<HistoryViewDto> viewCount = customerActivityService.countViewHistory();
+        request.setAttribute("viewCount", viewCount);
+        request.getRequestDispatcher("/transaction/history-view.jsp").forward(request, response);
     }
 
 

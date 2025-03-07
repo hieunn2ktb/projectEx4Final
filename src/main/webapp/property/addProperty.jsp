@@ -1,19 +1,9 @@
-<%@ page import="ks.training.entity.User" %>
+
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <%
     String msg = (request.getAttribute("msg") + "");
     msg = msg.equals("null") ? "" : msg;
-    HttpSession sessionUser = request.getSession(false);
-    Object obj = session.getAttribute("User");
-    User user = null;
-    if (sessionUser == null || obj == null) {
-        response.sendRedirect(request.getContextPath() + "/user/login.jsp");
-        return;
-    }else {
-        user = (User) obj;
-    }
-
     %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -30,7 +20,6 @@
     </div>
     <form action="${pageContext.request.contextPath}/propertyMng" method="post" enctype="multipart/form-data">
         <input type="hidden" name="action" value="addProperty">
-        <div><input type="hidden" name="UserId" class="form-control" value="<%=user.getId()%>" required></div>
         <div class="form-group">
             <label>Tiêu đề:</label>
             <input type="text" name="title" class="form-control" required>

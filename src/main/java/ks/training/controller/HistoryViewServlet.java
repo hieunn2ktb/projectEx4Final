@@ -33,6 +33,6 @@ public class HistoryViewServlet extends HttpServlet {
 
         List<HistoryViewDto> viewCount = customerActivityService.countViewHistory();
         request.setAttribute("viewCount", viewCount);
-        request.getRequestDispatcher("/WEB-INF/views/history-view.jsp").forward(request, response);
+        request.getRequestDispatcher("/transaction/history-view.jsp").forward(request, response);
     }
 }
