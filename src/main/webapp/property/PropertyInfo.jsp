@@ -1,39 +1,14 @@
-<%@ page import="ks.training.service.PropertyService" %>
+
 <%@ page import="ks.training.entity.Property" %>
-<%@ page import="ks.training.dao.PropertyDao" %>
 <%@ page import="java.util.List" %>
 <%@ page import="ks.training.entity.User" %>
-<%@ page import="ks.training.service.CustomerActivityService" %>
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 
 <%
-    HttpSession sessionUser = request.getSession(false);
-    Object obj = session.getAttribute("User");
-    User user = null;
-    if (sessionUser == null || obj == null) {
-        response.sendRedirect(request.getContextPath() + "/user/login.jsp");
-        return;
-    }
-    String propertyIdStr = request.getParameter("id");
-    int propertyId = 0;
-    if (propertyIdStr != null) {
-        try {
-            propertyId = Integer.parseInt(propertyIdStr);
-        } catch (NumberFormatException e) {
-            propertyId = 0;
-        }
-    }
-%>
-<%
-    CustomerActivityService customerActivityService = new CustomerActivityService();
-    if (obj != null) {
-        user = (User) obj;
-        customerActivityService.logCustomerActivity(user.getId(), propertyId);
-    }
-    PropertyService propertyService = new PropertyService();
-    Property property = propertyService.findPropertyById(propertyId);
-    PropertyDao propertyDao = new PropertyDao();
-    List<byte[]> images = propertyDao.getImagesByPropertyId(propertyId);
+    Property property = (Property) request.getAttribute("property");
+    int propertyId = property.getId();
+    List<byte[]> images = (List<byte[]>) request.getAttribute("images");
+    User user = (User) request.getAttribute("user");
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -124,11 +99,13 @@
                 if (user != null) {
                     if (user.getRole().equals("Customer")) {
             %>
-            <a class="btn btn-custom"
-               href="${pageContext.request.contextPath}/transaction/confirm-transaction.jsp?propertyId=<%=property.getId()%>&buyerId=<%=user.getId()%>&type=Đặt Cọc">Đặt
-                Cọc</a>
-            <a class="btn btn-custom"
-               href="${pageContext.request.contextPath}/transaction/confirm-transaction.jsp?propertyId=<%=property.getId()%>&buyerId=<%=user.getId()%>&type=Mua">Mua</a>
+            <form action="transaction" method="post">
+                <input type="hidden" name="action" value="redirect">
+                <input type="hidden" name="propertyId" value="<%=property.getId()%>">
+                <input type="hidden" name="buyerId" value="<%=user.getId()%>">
+                <button type="submit" name="transactionType" value="Đặt cọc" class="btn btn-custom">Đặt Cọc</button>
+                <button type="submit" name="transactionType" value="Mua" class="btn btn-custom">Mua</button>
+            </form>
         </div>
         <% }
         }

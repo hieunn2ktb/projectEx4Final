@@ -97,4 +97,8 @@ public class PropertyService {
     public boolean checkUser(int userId, int propertyId){
         return propertyDao.checkUser( userId, propertyId);
     };
+
+    public List<byte[]> getImagesByPropertyId(int propertyId) {
+        return propertyDao.getImagesByPropertyId(propertyId);
+    }
 }

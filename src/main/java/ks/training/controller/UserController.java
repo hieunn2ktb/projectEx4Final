@@ -32,24 +32,54 @@ public class UserController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
-        if (action.equals("login")) {
-            login(request, response);
-        } else if (action.equals("logout")) {
-            logout(request, response);
-        } else if (action.equals("register")) {
-            register(request, response);
-        } else if (action.equals("edit")) {
-            editUser(request, response);
+
+        if (action == null) {
+            response.sendRedirect("index.jsp");
+            return;
+        }
+
+        switch (action) {
+            case "login":
+                login(request, response);
+                break;
+            case "logout":
+                logout(request, response);
+                break;
+            case "register":
+                request.getRequestDispatcher("/user/register.jsp").forward(request, response);
+                break;
+            case "editUser":
+                request.getRequestDispatcher("/user/editUser.jsp").forward(request, response);
+                break;
         }
     }
 
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        doGet(request, response);
+        String action = request.getParameter("action");
+
+        if (action == null) {
+            response.sendRedirect("index.jsp");
+            return;
+        }
+
+        switch (action) {
+            case "editUser":
+                editUser(request, response);
+                break;
+            case "register":
+                register(request, response);
+                break;
+            case "login":
+                login(request, response);
+                break;
+        }
     }
 
     private void editUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        User user = getAuthenticatedUser(request, response);
+        if (user == null) return;
         String fullName = request.getParameter("fullName");
         String address = request.getParameter("address");
         String phone = request.getParameter("phone");
@@ -65,9 +95,6 @@ public class UserController extends HttpServlet {
 
         request.setAttribute("msgError", msgError);
         boolean isUpdated = false;
-
-        Object obj = request.getSession().getAttribute("User");
-        User user = (obj instanceof User) ? (User) obj : null;
 
         if (user != null) {
             user.setFullName(fullName);
@@ -90,6 +117,7 @@ public class UserController extends HttpServlet {
 
         RequestDispatcher rd = getServletContext().getRequestDispatcher(url);
         rd.forward(request, response);
+
     }
 
 
@@ -197,5 +225,15 @@ public class UserController extends HttpServlet {
         } catch (SQLException e) {
             throw new ServletException("Lỗi truy vấn dữ liệu");
         }
+    }
+    private User getAuthenticatedUser(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession(false);
+        User user = (session != null) ? (User) session.getAttribute("User") : null;
+
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+            return null;
+        }
+        return user;
     }
 }

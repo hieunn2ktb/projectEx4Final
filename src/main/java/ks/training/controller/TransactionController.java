@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import ks.training.dto.HistoryViewDto;
+import ks.training.dto.TransactionDto;
 import ks.training.dto.TransactionResponseDto;
 import ks.training.entity.User;
 import ks.training.service.CustomerActivityService;
@@ -16,12 +17,14 @@ import ks.training.service.TransactionService;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.List;
 
 @WebServlet("/transaction")
 public class TransactionController extends HttpServlet {
     private TransactionService transactionService;
     private CustomerActivityService customerActivityService;
+
     public TransactionController() {
         this.transactionService = new TransactionService();
         this.customerActivityService = new CustomerActivityService();
@@ -35,6 +38,32 @@ public class TransactionController extends HttpServlet {
             return;
         }
         switch (action) {
+            case "allTransaction":
+                getAllTransactions(req, resp);
+                break;
+            case "updateStatus":
+                updateStatusTransaction(req, resp);
+                break;
+            case "viewHistory":
+                historyView(req, resp);
+                break;
+            default:
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Hành động không hợp lệ");
+                break;
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+        if (action == null) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu tham số action");
+            return;
+        }
+        switch (action) {
+            case "redirect":
+                showConfirmPage(req, resp);
+                break;
             case "confirm":
                 confirmTransaction(req, resp);
                 break;
@@ -53,30 +82,57 @@ public class TransactionController extends HttpServlet {
         }
     }
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
-        doGet(request, resp);
+    private void showConfirmPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        int propertyId = Integer.parseInt(req.getParameter("propertyId"));
+        int buyerId = Integer.parseInt(req.getParameter("buyerId"));
+
+        String transactionType = req.getParameter("transactionType");
+        req.setAttribute("msg","");
+        TransactionDto transactionDto = transactionService.getPropertyById(propertyId);
+        req.setAttribute("transactionDto", transactionDto);
+        req.setAttribute("transactionType", transactionType);
+        DecimalFormat decimalFormat = new DecimalFormat("#,###");
+        String formattedPrice = decimalFormat.format(transactionDto.getPrice());
+        req.setAttribute("formattedPrice", formattedPrice);
+
+        req.getRequestDispatcher("/transaction/confirm-transaction.jsp").forward(req, resp);
     }
 
-    private void confirmTransaction(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
+    private void confirmTransaction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("User") == null) {
+            response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+            return;
+        }
+        User user = (User) session.getAttribute("User");
+
         int propertyId = Integer.parseInt(request.getParameter("propertyId"));
         int buyerId = Integer.parseInt(request.getParameter("buyerId"));
-        int sellerId = Integer.parseInt(request.getParameter("sellerId"));
+
         String transactionType = request.getParameter("transactionType");
+
+
+        TransactionDto transactionDto = transactionService.getPropertyById(propertyId);
+        request.setAttribute("transactionDto", transactionDto);
+        DecimalFormat decimalFormat = new DecimalFormat("#,###");
+        String formattedPrice = decimalFormat.format(transactionDto.getPrice());
+        request.setAttribute("formattedPrice", formattedPrice);
+        int sellerId = transactionDto.getSellerId();
         boolean check = transactionService.checkTransaction(propertyId);
         String msg = "";
         String url = "";
         if (!check) {
             transactionService.processTransaction(propertyId, buyerId, sellerId, transactionType);
             url = "transaction/transaction-success.jsp";
-        }else {
+        } else {
             msg = "Bất động sản đã có giao dịch vui lòng chọn bất động sản khác ";
             url = "transaction/confirm-transaction.jsp";
         }
         request.setAttribute("msg", msg);
         RequestDispatcher rd = request.getRequestDispatcher(url);
-        rd.forward(request, resp);
+        rd.forward(request, response);
     }
+
     private void getAllTransactions(HttpServletRequest request, HttpServletResponse resp) throws ServletException {
         int recordsPerPage = 10;
         int currentPage = 1;
@@ -121,18 +177,19 @@ public class TransactionController extends HttpServlet {
             throw new RuntimeException(e);
         }
     }
+
     private void updateStatusTransaction(HttpServletRequest request, HttpServletResponse resp) throws IOException {
         int transactionId = Integer.parseInt(request.getParameter("transaction_id"));
         String newStatus = request.getParameter("status");
         try {
-          boolean updated = transactionService.updateTransactionStatus(transactionId, newStatus);
+            boolean updated = transactionService.updateTransactionStatus(transactionId, newStatus);
             if (updated) {
                 String buyerEmail = transactionService.getBuyerEmail(transactionId);
                 if (buyerEmail != null) {
                     EmailService.sendEmail(buyerEmail, "Cập nhật giao dịch", "Trạng thái giao dịch của bạn đã thay đổi thành: " + newStatus);
                 }
             }
-            getAllTransactions(request,resp);
+            getAllTransactions(request, resp);
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (ServletException e) {
@@ -140,6 +197,7 @@ public class TransactionController extends HttpServlet {
         }
 
     }
+
     private void historyView(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         HttpSession session = request.getSession(false);
         User user = (session != null) ? (User) session.getAttribute("User") : null;

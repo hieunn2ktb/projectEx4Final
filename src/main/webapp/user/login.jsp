@@ -141,7 +141,7 @@
         </div>
         <button type="submit" class="login-btn">LOGIN</button>
     </form>
-    <p class="signup-link">Don't have an account? <a href="register.jsp">Sign Up</a></p>
+    <p class="signup-link">Don't have an account? <a href="${pageContext.request.contextPath}/user?action=register">Sign Up</a></p>
 </div>
 
 </body>

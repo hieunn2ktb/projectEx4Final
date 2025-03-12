@@ -5,8 +5,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import ks.training.dao.PropertyDao;
 import ks.training.dto.PropertyDto;
 import ks.training.dto.PropertyResponse;
+import ks.training.entity.Property;
 import ks.training.entity.User;
 import ks.training.service.CustomerActivityService;
 import ks.training.service.PropertyService;
@@ -22,9 +24,10 @@ import java.util.List;
 @MultipartConfig(maxFileSize = 1024 * 1024 * 5)
 public class PropertyController extends HttpServlet {
     private PropertyService propertyService;
-
+    private CustomerActivityService customerActivityService;
     public PropertyController() {
         this.propertyService = new PropertyService();
+        this.customerActivityService = new CustomerActivityService();
     }
 
     @Override
@@ -42,7 +45,10 @@ public class PropertyController extends HttpServlet {
                 addProperty(req, resp);
                 break;
             case "edit":
-                updateProperty(req, resp);
+                editProperty(req, resp);
+                break;
+            case "info":
+                getProperty(req, resp);
                 break;
             default:
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Hành động không hợp lệ");
@@ -61,13 +67,11 @@ public class PropertyController extends HttpServlet {
         int createBy = Integer.parseInt(request.getParameter("createBy"));
         String msgDelete = "";
         HttpSession session = request.getSession();
-         if (propertyService.checkUser(propertyId,createBy)){
+        if (propertyService.checkUser(propertyId, createBy)) {
             msgDelete = "Bất động sản không thể xoá, vì bạn không phải là người tạo";
-        }
-        else if (propertyService.checkTransactionSQL(propertyId)) {
+        } else if (propertyService.checkTransactionSQL(propertyId)) {
             msgDelete = "Bất động sản đã có giao dịch, không thể xoá";
-        }
-        else {
+        } else {
             int rowsAffected = propertyService.deleteProperty(propertyId);
             msgDelete = (rowsAffected > 0) ? "Đã xoá bất động sản" : "Xoá thất bại";
         }
@@ -75,6 +79,7 @@ public class PropertyController extends HttpServlet {
         getAllList(request);
         request.getRequestDispatcher("index.jsp").forward(request, resp);
     }
+
     private void addProperty(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         User user = (session != null) ? (User) session.getAttribute("User") : null;
@@ -128,8 +133,8 @@ public class PropertyController extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi xử lý yêu cầu!");
         }
     }
+
     private void updateProperty(HttpServletRequest request, HttpServletResponse resp) throws IOException {
-        System.out.println("da goi den pt update");
         try {
             if (!request.getContentType().toLowerCase().startsWith("multipart/")) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request không hỗ trợ multipart");
@@ -177,6 +182,55 @@ public class PropertyController extends HttpServlet {
         }
     }
 
+    private void editProperty(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("User") == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+        User user = (User) session.getAttribute("User");
+
+        int propertyId = Integer.parseInt(request.getParameter("propertyId"));
+        PropertyDao propertyDao = new PropertyDao();
+        Property property = propertyDao.findPropertyById(propertyId);
+        List<byte[]> images = propertyDao.getImagesByPropertyId(propertyId);
+
+        request.setAttribute("user", user);
+        request.setAttribute("property", property);
+        request.setAttribute("images", images);
+        request.getRequestDispatcher("/property/editProperty.jsp").forward(request, response);
+    }
+
+    private void getProperty(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        HttpSession session = request.getSession(false);
+        User user = (session != null) ? (User) session.getAttribute("User") : null;
+
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+            return;
+        }
+
+        String propertyIdStr = request.getParameter("propertyId");
+        int propertyId = 0;
+        try {
+            if (propertyIdStr != null) {
+                propertyId = Integer.parseInt(propertyIdStr);
+            }
+        } catch (NumberFormatException e) {
+            return;
+        }
+
+        Property property = propertyService.findPropertyById(propertyId);
+        List<byte[]> images = propertyService.getImagesByPropertyId(propertyId);
+
+        customerActivityService.logCustomerActivity(user.getId(), propertyId);
+
+        request.setAttribute("property", property);
+        request.setAttribute("images", images);
+        request.setAttribute("user", user);
+
+        request.getRequestDispatcher("/property/PropertyInfo.jsp").forward(request, response);
+    }
 
 
     private void getAllList(HttpServletRequest request) throws ServletException {

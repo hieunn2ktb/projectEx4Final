@@ -1,30 +1,14 @@
-<%@ page import="java.text.DecimalFormat" %>
-<%@ page import="ks.training.dto.TransactionDto" %>
-<%@ page import="ks.training.entity.User" %>
-<%@ page import="ks.training.service.TransactionService" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="ks.training.dto.TransactionDto" %>
 
 <%
-    HttpSession sessionUser = request.getSession(false);
-    Object obj = session.getAttribute("User");
-    User user = null;
-    if (sessionUser == null || obj == null) {
-        response.sendRedirect(request.getContextPath() + "/user/login.jsp");
-        return;
-    } else  {
-        user = (User) obj;
-    }
+    TransactionDto transactionDto = (TransactionDto) request.getAttribute("transactionDto");
+    String formattedPrice = (String) request.getAttribute("formattedPrice");
+    String transactionType = (String) request.getAttribute("transactionType");
+    String msg = (String) request.getAttribute("msg");
+
     int propertyId = Integer.parseInt(request.getParameter("propertyId"));
     int buyerId = Integer.parseInt(request.getParameter("buyerId"));
-    String transactionType = request.getParameter("type");
-
-
-    TransactionService transactionService = new TransactionService();
-    TransactionDto transactionDto = transactionService.getPropertyById(propertyId);
-    if (transactionDto == null) transactionDto = new TransactionDto();
-    String msg  = request.getAttribute("msg") + "";
-    msg = msg.equals("null") ? "" : msg;
-    System.out.println(msg);
 %>
 
 <!DOCTYPE html>
@@ -59,8 +43,8 @@
             display: inline-block;
             width: 150px;
         }
-        .text-danger{
-            color : red;
+        .text-danger {
+            color: red;
         }
         .btn {
             display: block;
@@ -83,17 +67,14 @@
 
 <div class="container">
     <h2>Xác nhận Giao dịch</h2>
-    <div class="text-danger" id="error"><%=msg%>
-    </div>
-    <div class="info"><strong>Bất động sản:</strong> <%=transactionDto.getTitle() %>
-    </div>
-    <div class="info"><strong>Địa chỉ:</strong> <%= transactionDto.getAddress() %>
-    </div>
-    <div class="info"><strong>Giá:</strong> <%= new DecimalFormat("#,###").format(transactionDto.getPrice()) %> VNĐ</div>
-    <div class="info"><strong>Người bán:</strong> <%= transactionDto.getSellerName() %>
-    </div>
-    <div class="info"><strong>Loại giao dịch:</strong> <%= transactionType %>
-    </div>
+
+    <div class="text-danger" id="error"><%= msg %></div>
+
+    <div class="info"><strong>Bất động sản:</strong> <%= transactionDto.getTitle() %></div>
+    <div class="info"><strong>Địa chỉ:</strong> <%= transactionDto.getAddress() %></div>
+    <div class="info"><strong>Giá:</strong> <%= formattedPrice %> VNĐ</div>
+    <div class="info"><strong>Người bán:</strong> <%= transactionDto.getSellerName() %></div>
+    <div class="info"><strong>Loại giao dịch:</strong> <%= transactionType %></div>
 
     <form action="${pageContext.request.contextPath}/transaction" method="post">
         <input type="hidden" name="action" value="confirm">

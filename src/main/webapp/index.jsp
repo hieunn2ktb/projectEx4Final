@@ -220,13 +220,14 @@
             <% } else { %>
             <li><a style="while-space: nowrap;">Xin chào <%=user.getFullName()%>
             </a></li>
-            <li><a href="?action=logout" class="btn">Đăng xuất</a></li>
-            <li><a href="user/editUser.jsp" class="btn">Thay đổi thông tin</a></li>
+            <li><a href="user?action=logout" class="btn">Đăng xuất</a></li>
+            <li><a href="user?action=editUser" class="btn">Thay đổi thông tin</a></li>
             <% if ("Employee".equals(user.getRole())) { %>
             <li><a href="property/addProperty.jsp" class="btn">Thêm Bất Động Sản</a></li>
             <li><a href="transaction?action=allTransaction" class="btn">Quản lý giao dịch</a></li>
             <li><a href="report/reports.jsp" class="btn">Báo cáo giao dịch</a></li>
-            <li><a href="${pageContext.request.contextPath}/transaction?action=viewHistory" class="btn">Lịch sử BĐS khách hàng đã xem</a></li>
+            <li><a href="${pageContext.request.contextPath}/transaction?action=viewHistory" class="btn">Lịch sử BĐS
+                khách hàng đã xem</a></li>
             <%
                     }
                 }
@@ -284,16 +285,21 @@
                 </p>
             </div>
             <% if (user != null) { %>
-            <a href="property/PropertyInfo.jsp?id=<%= property.getId() %>" class="search-btn">
-                Xem chi Tiết
-            </a>
+            <form action="propertyMng" method="post">
+                <input type="hidden" name="action" value="info">
+                <input type="hidden" name="propertyId" value="<%= property.getId() %>">
+                <button type="submit" class="btn btn-warning">Xem chi Tiết</button>
+            </form>
             <% if ("Employee".equals(user.getRole())) { %>
-            <a href="propertyMng?action=delete&id=<%= property.getId() %>&createBy=<%=property.getCreateBy()%>" class="search-btn">
+            <a href="propertyMng?action=delete&id=<%= property.getId() %>&createBy=<%=property.getCreateBy()%>"
+               class="search-btn">
                 Xoá Bất Động Sản
             </a>
-            <a href="property/editProperty.jsp?propertyId=<%= property.getId() %>" class="search-btn">
-                Update Bất Động Sản
-            </a>
+            <form action="propertyMng" method="post">
+                <input type="hidden" name="action" value="edit">
+                <input type="hidden" name="propertyId" value="<%= property.getId() %>">
+                <button type="submit" class="btn btn-warning">Cập nhật BĐS</button>
+            </form>
             <% }
             } %>
         </div>

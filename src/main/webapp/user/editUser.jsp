@@ -35,7 +35,6 @@
         return;
     } else {
         user = (User) obj;
-
     }
     if
     (user == null) { %>
@@ -56,8 +55,8 @@
         <div class="red" id="baoLoi">
             <%=msgError %>
         </div>
-        <form class="form" action="../user" method="post">
-            <input type="hidden" name="action" value="edit">
+        <form class="form" action="user" method="post">
+            <input type="hidden" name="action" value="editUser">
             <div class="row">
                 <div class="col-sm-6">
                     <div class="mb-3">
@@ -97,7 +96,6 @@
                 <input class="btn btn-primary form-control" type="submit" value="Lưu thông tin"
                        name="submit" id="submit"/>
             </div>
-    </div>
     </form>
 </div>
 </div>

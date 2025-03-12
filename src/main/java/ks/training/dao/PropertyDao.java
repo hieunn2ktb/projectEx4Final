@@ -75,7 +75,9 @@ public class PropertyDao {
 
 
     public int countProperties(String minPrice, String maxPrice, String searchAddress, String searchPropertyType) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM properties WHERE 1=1";
+        String sql = "SELECT COUNT(*) FROM properties p " +
+                "LEFT JOIN transactions t ON p.id = t.property_id " +
+                "WHERE t.property_id IS NULL";
         List<Object> params = new ArrayList<>();
 
         if (minPrice != null && maxPrice != null && !minPrice.isEmpty() && !maxPrice.isEmpty()) {

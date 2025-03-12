@@ -1,25 +1,12 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="ks.training.entity.User" %>
 <%@ page import="ks.training.entity.Property" %>
 <%@ page import="java.util.List" %>
-<%@ page import="ks.training.dao.PropertyDao" %>
 <%
     String msg = (request.getAttribute("msg") + "");
     msg = msg.equals("null") ? "" : msg;
-    HttpSession sessionUser = request.getSession(false);
-    Object obj = session.getAttribute("User");
-    User user = null;
-    if (sessionUser == null || obj == null) {
-        response.sendRedirect(request.getContextPath() + "/user/login.jsp");
-        return;
-    }else {
-        user = (User) obj;
-    }
-
-    int propertyId = Integer.parseInt(request.getParameter("propertyId"));
-    PropertyDao propertyDao = new PropertyDao();
-    Property property = propertyDao.findPropertyById(propertyId);
-    List<byte[]> images = propertyDao.getImagesByPropertyId(propertyId);
+    Property property = (Property) request.getAttribute("property");
+    int propertyId = property.getId();
+    List<byte[]> images = (List<byte[]>) request.getAttribute("images");
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -35,7 +22,6 @@
     </div>
     <form action="${pageContext.request.contextPath}/propertyMng" method="post" enctype="multipart/form-data">
         <input type="hidden" name="action" value="edit">
-        <input type="hidden" name="userId" value="<%= user.getId() %>">
         <input type="hidden" name="propertyId" value="<%= propertyId %>">
         <div class="form-group">
             <label>Tiêu đề:</label>
@@ -56,9 +42,13 @@
         <div class="form-group">
             <label>Loại hình:</label>
             <select name="property_type" class="form-control">
-                <option value="Căn hộ" <%= property.getPropertyType().equals("Căn hộ") ? "selected" : "" %>>Căn hộ</option>
-                <option value="Nhà riêng" <%= property.getPropertyType().equals("Nhà riêng") ? "selected" : "" %>>Nhà riêng</option>
-                <option value="Đất nền" <%= property.getPropertyType().equals("Đất nền") ? "selected" : "" %>>Đất nền</option>
+                <option value="Căn hộ" <%= property.getPropertyType().equals("Căn hộ") ? "selected" : "" %>>Căn hộ
+                </option>
+                <option value="Nhà riêng" <%= property.getPropertyType().equals("Nhà riêng") ? "selected" : "" %>>Nhà
+                    riêng
+                </option>
+                <option value="Đất nền" <%= property.getPropertyType().equals("Đất nền") ? "selected" : "" %>>Đất nền
+                </option>
                 <option value="Khác" <%= property.getPropertyType().equals("Khác") ? "selected" : "" %>>Khác</option>
             </select>
         </div>
@@ -73,7 +63,8 @@
                 <div class="carousel-inner">
                     <% for (int i = 0; i < images.size(); i++) { %>
                     <div class="carousel-item <%= i == 0 ? "active" : "" %>">
-                        <img src="<%= request.getContextPath() %>/ImageServlet?propertyId=<%= propertyId %>&imageIndex=<%= i %>" class="d-block w-100" alt="<%=property.getTitle()%>">
+                        <img src="<%= request.getContextPath() %>/ImageServlet?propertyId=<%= propertyId %>&imageIndex=<%= i %>"
+                             class="d-block w-100" alt="<%=property.getTitle()%>">
                     </div>
                     <% } %>
                 </div>
