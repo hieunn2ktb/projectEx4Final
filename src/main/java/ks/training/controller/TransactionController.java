@@ -133,7 +133,14 @@ public class TransactionController extends HttpServlet {
         rd.forward(request, response);
     }
 
-    private void getAllTransactions(HttpServletRequest request, HttpServletResponse resp) throws ServletException {
+    private void getAllTransactions(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        Object obj = session.getAttribute("User");
+        User user = null;
+        if (session == null || obj == null) {
+            resp.sendRedirect(request.getContextPath() + "/user/login.jsp");
+            return;
+        }
         int recordsPerPage = 10;
         int currentPage = 1;
         String status = request.getParameter("status");

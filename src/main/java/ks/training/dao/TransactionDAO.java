@@ -39,7 +39,7 @@ public class TransactionDAO {
     public boolean processTransaction(Connection conn, int propertyId, int buyerId, int sellerId, String transactionType) {
         String statusId = "Đang xử lý";
         boolean result = false;
-        String sql = "INSERT INTO transactions (property_id, buyer_id, seller_id, transaction_type, status_id) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO transactions (property_id, buyer_id, seller_id, transaction_type, status) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, propertyId);
             pstmt.setInt(2, buyerId);

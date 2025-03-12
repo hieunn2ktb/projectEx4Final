@@ -41,6 +41,9 @@ public class PropertyController extends HttpServlet {
             case "delete":
                 deleteProperty(req, resp);
                 break;
+            case "viewAddProperty":
+                showViewAddProperty(req, resp);
+                break;
             case "addProperty":
                 addProperty(req, resp);
                 break;
@@ -62,7 +65,6 @@ public class PropertyController extends HttpServlet {
     }
 
     private void deleteProperty(HttpServletRequest request, HttpServletResponse resp) throws IOException, ServletException {
-        System.out.println("phuong thuc xoa da duoc goi");
         int propertyId = Integer.parseInt(request.getParameter("id"));
         int createBy = Integer.parseInt(request.getParameter("createBy"));
         String msgDelete = "";
@@ -80,6 +82,16 @@ public class PropertyController extends HttpServlet {
         request.getRequestDispatcher("index.jsp").forward(request, resp);
     }
 
+    private void showViewAddProperty(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        User user = (session != null) ? (User) session.getAttribute("User") : null;
+
+        if (user == null) {
+            resp.sendRedirect(request.getContextPath() + "/user/login.jsp");
+            return;
+        }
+        request.getRequestDispatcher("/property/addProperty.jsp").forward(request, resp);
+    }
     private void addProperty(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         User user = (session != null) ? (User) session.getAttribute("User") : null;

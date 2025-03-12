@@ -190,13 +190,11 @@
 
 <body>
 <%
-
     Object obj = session.getAttribute("User");
     User user = null;
     if (obj != null) {
         user = (User) obj;
         session.setAttribute("role", user.getRole());
-        System.out.println(user.getRole());
     }
 %>
 
@@ -223,9 +221,9 @@
             <li><a href="user?action=logout" class="btn">Đăng xuất</a></li>
             <li><a href="user?action=editUser" class="btn">Thay đổi thông tin</a></li>
             <% if ("Employee".equals(user.getRole())) { %>
-            <li><a href="property/addProperty.jsp" class="btn">Thêm Bất Động Sản</a></li>
+            <li><a href="propertyMng?action=viewAddProperty" class="btn">Thêm Bất Động Sản</a></li>
             <li><a href="transaction?action=allTransaction" class="btn">Quản lý giao dịch</a></li>
-            <li><a href="report/reports.jsp" class="btn">Báo cáo giao dịch</a></li>
+            <li><a href="report" class="btn">Báo cáo giao dịch</a></li>
             <li><a href="${pageContext.request.contextPath}/transaction?action=viewHistory" class="btn">Lịch sử BĐS
                 khách hàng đã xem</a></li>
             <%
@@ -238,7 +236,7 @@
 </header>
 
 <section class="hero">
-    <form action="" method="get">
+    <form action="home" method="get">
         <div class="search-box">
             <label for="address">Địa chỉ:</label>
             <input type="text" id="address" name="searchAddress">
@@ -291,10 +289,12 @@
                 <button type="submit" class="btn btn-warning">Xem chi Tiết</button>
             </form>
             <% if ("Employee".equals(user.getRole())) { %>
-            <a href="propertyMng?action=delete&id=<%= property.getId() %>&createBy=<%=property.getCreateBy()%>"
-               class="search-btn">
-                Xoá Bất Động Sản
-            </a>
+            <form action="propertyMng" method="post">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" value="<%= property.getId() %>">
+                <input type="hidden" name="createBy" value="<%= property.getCreateBy() %>">
+                <button type="submit" class="btn btn-warning">Xoá Bất Động Sản</button>
+            </form>
             <form action="propertyMng" method="post">
                 <input type="hidden" name="action" value="edit">
                 <input type="hidden" name="propertyId" value="<%= property.getId() %>">
@@ -310,20 +310,20 @@
 <div>
     <div class="pagination">
         <c:if test="${currentPage > 1}">
-            <a href="${pageContext.request.contextPath}?page=${currentPage - 1}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchAddress=${searchAddress}&searchPropertyType=${searchPropertyType}">
+            <a href="${pageContext.request.contextPath}/home?page=${currentPage - 1}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchAddress=${searchAddress}&searchPropertyType=${searchPropertyType}">
                 &laquo; Trước
             </a>
         </c:if>
 
         <c:forEach var="i" begin="1" end="${totalPages}">
-            <a href="${pageContext.request.contextPath}?page=${i}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchAddress=${searchAddress}&searchPropertyType=${searchPropertyType}"
+            <a href="${pageContext.request.contextPath}/home?page=${i}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchAddress=${searchAddress}&searchPropertyType=${searchPropertyType}"
                class="${i == currentPage ? 'active' : ''}">
                     ${i}
             </a>
         </c:forEach>
 
         <c:if test="${currentPage < totalPages}">
-            <a href="${pageContext.request.contextPath}?page=${currentPage + 1}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchAddress=${searchAddress}&searchPropertyType=${searchPropertyType}">
+            <a href="${pageContext.request.contextPath}/home?page=${currentPage + 1}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchAddress=${searchAddress}&searchPropertyType=${searchPropertyType}">
                 Tiếp &raquo;
             </a>
         </c:if>

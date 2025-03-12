@@ -39,13 +39,7 @@
   </style>
 </head>
 <%
-  HttpSession sessionUser = request.getSession(false);
-  Object obj = session.getAttribute("User");
-  User user = null;
-  if (sessionUser == null || obj == null) {
-    response.sendRedirect(request.getContextPath() + "/user/login.jsp");
-    return;
-  }
+
   String status = request.getParameter("status") != null ? request.getParameter("status") : "";
   String buyerName = request.getParameter("buyerName") != null ? request.getParameter("buyerName") : "";
   String startDate = request.getParameter("startDate") != null ? request.getParameter("startDate") : "";
@@ -124,9 +118,9 @@
           <div class="input-group">
             <select name="status" class="form-select">
               <option value="Đang xử lý" <%= transaction.getStatus().equals("Đang xử lý") ? "selected" : "" %>>Đang xử lý</option>
-              <option value="Đã hoàn thành" <%= transaction.getStatus().equals("Đã hoàn thành") ? "selected" : "" %>>Đã hoàn thành</option>
+              <option value="Đã hoàn thành" <%= transaction.getStatus().equals("Đã hoàn thành") ? "disabled" : "" %>>Đã hoàn thành</option>
             </select>
-            <button type="submit" class="btn btn-primary">Cập nhật</button>
+            <button type="submit" class="btn btn-primary" <%= transaction.getStatus().equals("Đã hoàn thành") ? "disabled" : "" %>>Cập nhật</button>
           </div>
         </form>
       </td>

@@ -26,20 +26,11 @@
         }
     </style>
 </head>
-<%
-    HttpSession sessionUser = request.getSession(false);
-    Object obj = session.getAttribute("User");
-    User user = null;
-    if (sessionUser == null || obj == null) {
-        response.sendRedirect(request.getContextPath() + "/user/login.jsp");
-        return;
-    }
-%>
 <body>
 
 <h2>Báo cáo giao dịch theo tháng</h2>
 
-<form action="${pageContext.request.contextPath}/report" method="GET">
+<form action="${pageContext.request.contextPath}/report" method="Post">
     <label for="month">Chọn tháng:</label>
     <select name="month" id="month" required>
         <% for(int i = 1; i <= 12; i++) { %>
