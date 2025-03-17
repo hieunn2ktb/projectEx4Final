@@ -21,7 +21,7 @@
     <div class="text-danger" id="msg"><%=msg%>
     </div>
     <form action="${pageContext.request.contextPath}/propertyMng" method="post" enctype="multipart/form-data">
-        <input type="hidden" name="action" value="edit">
+        <input type="hidden" name="action" value="editSuccess">
         <input type="hidden" name="propertyId" value="<%= propertyId %>">
         <div class="form-group">
             <label>Tiêu đề:</label>

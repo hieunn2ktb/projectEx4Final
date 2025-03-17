@@ -30,7 +30,8 @@ public class ReportServlet extends HttpServlet {
         }
         int month = Integer.parseInt(request.getParameter("month"));
         int year = Integer.parseInt(request.getParameter("year"));
-        int transactionCount = reportDAO.getTransactionCountByMonth(month, year);
+        String type = request.getParameter("status");
+        int transactionCount = reportDAO.getTransactionCountByMonth(month, year,type);
 
         request.setAttribute("transactionCount", transactionCount);
         request.getRequestDispatcher("report/reports.jsp").forward(request, response);

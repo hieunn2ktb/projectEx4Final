@@ -50,6 +50,9 @@ public class PropertyController extends HttpServlet {
             case "edit":
                 editProperty(req, resp);
                 break;
+            case "editSuccess":
+                updateProperty(req, resp);
+                break;
             case "info":
                 getProperty(req, resp);
                 break;
@@ -92,6 +95,7 @@ public class PropertyController extends HttpServlet {
         }
         request.getRequestDispatcher("/property/addProperty.jsp").forward(request, resp);
     }
+
     private void addProperty(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         User user = (session != null) ? (User) session.getAttribute("User") : null;
@@ -146,6 +150,24 @@ public class PropertyController extends HttpServlet {
         }
     }
 
+    private void editProperty(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("User") == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+        User user = (User) session.getAttribute("User");
+
+        int propertyId = Integer.parseInt(request.getParameter("propertyId"));
+        PropertyDao propertyDao = new PropertyDao();
+        Property property = propertyDao.findPropertyById(propertyId);
+        List<byte[]> images = propertyDao.getImagesByPropertyId(propertyId);
+
+        request.setAttribute("user", user);
+        request.setAttribute("property", property);
+        request.setAttribute("images", images);
+        request.getRequestDispatcher("/property/editProperty.jsp").forward(request, response);
+    }
     private void updateProperty(HttpServletRequest request, HttpServletResponse resp) throws IOException {
         try {
             if (!request.getContentType().toLowerCase().startsWith("multipart/")) {
@@ -186,31 +208,11 @@ public class PropertyController extends HttpServlet {
             String msg = isSuccess ? "Update thành công bất động sản" : "Update thất bại";
             request.setAttribute("msg", msg);
 
-            RequestDispatcher rd = getServletContext().getRequestDispatcher("/property/editProperty.jsp");
-            rd.forward(request, resp);
+            editProperty(request, resp);
         } catch (Exception e) {
             e.printStackTrace();
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi xử lý yêu cầu!");
         }
-    }
-
-    private void editProperty(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("User") == null) {
-            response.sendRedirect("login.jsp");
-            return;
-        }
-        User user = (User) session.getAttribute("User");
-
-        int propertyId = Integer.parseInt(request.getParameter("propertyId"));
-        PropertyDao propertyDao = new PropertyDao();
-        Property property = propertyDao.findPropertyById(propertyId);
-        List<byte[]> images = propertyDao.getImagesByPropertyId(propertyId);
-
-        request.setAttribute("user", user);
-        request.setAttribute("property", property);
-        request.setAttribute("images", images);
-        request.getRequestDispatcher("/property/editProperty.jsp").forward(request, response);
     }
 
     private void getProperty(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -283,5 +285,7 @@ public class PropertyController extends HttpServlet {
             throw new ServletException("Lỗi truy vấn dữ liệu");
         }
     }
+
+
 
 }

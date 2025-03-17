@@ -253,8 +253,8 @@
             </div>
             <div class="filter-item">
                 <label for="min-price">Giá:</label>
-                <input type="number" id="min-price" name="minPrice" placeholder="Từ (USD)">
-                <input type="number" id="max-price" name="maxPrice" placeholder="Đến (USD)">
+                <input type="number" id="min-price" name="minPrice" placeholder="Từ (VNĐ)">
+                <input type="number" id="max-price" name="maxPrice" placeholder="Đến (VNĐ)">
             </div>
             <button class="search-btn">Tìm kiếm</button>
         </div>
