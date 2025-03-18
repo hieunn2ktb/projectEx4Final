@@ -1,7 +1,6 @@
 <%@ page import="java.util.List" %>
 <%@ page import="ks.training.dto.TransactionResponseDto" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="ks.training.entity.User" %>
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -65,8 +64,8 @@
       </select>
     </div>
     <div class="col-md-3">
-      <label for="buyerName" class="form-label">Tên KH</label>
-      <input type="text" id="buyerName" name="buyerName" class="form-control" value="${buyerName}">
+      <label for="email" class="form-label">Email KH</label>
+      <input type="email" id="email" name="email" class="form-control" value="${buyerEmail}">
     </div>
     <div class="col-md-3">
       <label for="startDate" class="form-label">Từ ngày</label>
@@ -78,6 +77,11 @@
     </div>
     <div class="col-12">
       <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+    </div>
+    <div col-12>
+      <a class="btn btn-danger mt-3" href="home">
+        <i class="bi bi-arrow-left-circle"></i> Quay về trang chủ
+      </a>
     </div>
   </form>
 
@@ -91,14 +95,15 @@
       <th>Trạng thái</th>
       <th>Thời gian tạo</th>
       <th>Cập nhật</th>
+      <th>Chi Tiết</th>
     </tr>
     </thead>
     <tbody>
     <%
-      List<TransactionResponseDto> properties = (List<TransactionResponseDto>) request.getAttribute("properties");
-      if (properties == null || properties.isEmpty()) properties = new ArrayList<>();
-      if (!properties.isEmpty()) {
-        for (TransactionResponseDto transaction : properties) {
+      List<TransactionResponseDto> transactions = (List<TransactionResponseDto>) request.getAttribute("transactions");
+      if (transactions == null || transactions.isEmpty()) transactions = new ArrayList<>();
+      if (!transactions.isEmpty()) {
+        for (TransactionResponseDto transaction : transactions) {
     %>
     <tr>
       <td><%= transaction.getId() %></td>
@@ -122,6 +127,20 @@
             </select>
             <button type="submit" class="btn btn-primary" <%= transaction.getStatus().equals("Đã hoàn thành") ? "disabled" : "" %>>Cập nhật</button>
           </div>
+        </form>
+      </td>
+      <td>
+        <form method="post" action="transaction">
+          <input type="hidden" name="propertyId" value="<%= transaction.getPropertyId() %>">
+          <input type="hidden" name="transactionId" value="<%= transaction.getId() %>">
+          <input type="hidden" name="action" value="propertyDetail">
+          <button type="submit" class="btn btn-primary">Chi Tiết Bất Động Sản</button>
+        </form>
+        <br>
+        <form method="post" action="transaction">
+          <input type="hidden" name="userId" value="<%= transaction.getUserId() %>">
+          <input type="hidden" name="action" value="userDetail">
+          <button type="submit" class="btn btn-primary">Chi Tiết Khách Hàng</button>
         </form>
       </td>
     </tr>

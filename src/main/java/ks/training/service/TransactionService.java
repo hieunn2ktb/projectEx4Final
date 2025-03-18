@@ -69,4 +69,8 @@ public class TransactionService {
     public String getBuyerEmail(int transactionId) {
         return  transactionDAO.getBuyerEmail(transactionId);
     }
+
+    public TransactionResponseDto getTransactionById(int id) {
+        return transactionDAO.getTransactionById(id);
+    }
 }

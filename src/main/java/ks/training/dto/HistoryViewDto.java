@@ -6,6 +6,24 @@ public class HistoryViewDto {
     private String titleProperty;
     private double price;
     private int countView;
+    private int propertyId;
+    private int userId;
+
+    public int getPropertyId() {
+        return propertyId;
+    }
+
+    public void setPropertyId(int propertyId) {
+        this.propertyId = propertyId;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
 
     public String getCustomerName() {
         return customerName;

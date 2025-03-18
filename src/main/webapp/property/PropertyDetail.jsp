@@ -1,7 +1,7 @@
-
 <%@ page import="ks.training.entity.Property" %>
 <%@ page import="java.util.List" %>
 <%@ page import="ks.training.entity.User" %>
+<%@ page import="ks.training.dto.TransactionResponseDto" %>
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 
 <%
@@ -9,6 +9,7 @@
     int propertyId = property.getId();
     List<byte[]> images = (List<byte[]>) request.getAttribute("images");
     User user = (User) request.getAttribute("user");
+    TransactionResponseDto transaction = (TransactionResponseDto) request.getAttribute("transaction");
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -97,20 +98,26 @@
             </div>
             <button type="button" class="btn btn-secondary" onclick="history.back();">Quay lại</button>
             <%
-                if (user != null) {
-                    if (user.getRole().equals("Customer")) {
+                if (user.getRole().equals("Employee")) {
             %>
-            <form action="transaction" method="post">
-                <input type="hidden" name="action" value="redirect">
-                <input type="hidden" name="propertyId" value="<%=property.getId()%>">
-                <input type="hidden" name="buyerId" value="<%=user.getId()%>">
-                <button type="submit" name="transactionType" value="Đặt cọc" class="btn btn-custom">Đặt Cọc</button>
-                <button type="submit" name="transactionType" value="Mua" class="btn btn-custom">Mua</button>
-            </form>
+            <div class="mt4">
+                <form method="post" action="transaction">
+                    <input type="hidden" name="transaction_id" value="<%= transaction.getId() %>">
+                    <input type="hidden" name="action" value="updateStatus">
+                    <div class="input-group">
+                        <select name="status" class="form-select">
+                            <option value="Đang xử lý" <%= transaction.getStatus().equals("Đang xử lý") ? "selected" : "" %>>Đang xử lý</option>
+                            <option value="Đã hoàn thành" <%= transaction.getStatus().equals("Đã hoàn thành") ? "disabled" : "" %>>Đã hoàn thành</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary" <%= transaction.getStatus().equals("Đã hoàn thành") ? "disabled" : "" %>>Cập nhật</button>
+                    </div>
+                </form>
+            </div>
+            <% }
+            %>
         </div>
-        <% }
-        }
-        }%>
+        <%
+            }%>
     </div>
 </div>
 

@@ -155,5 +155,25 @@ public class UserDao {
     }
 
 
-
+    public User userDetail(int userId) {
+        User user = null;
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String sql = "SELECT * FROM users WHERE id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                user = new User();
+                user.setId(rs.getInt("id"));
+                user.setFullName(rs.getString("full_name"));
+                user.setEmail(rs.getString("email"));
+                user.setPhone(rs.getString("phone"));
+                user.setAddress(rs.getString("address"));
+                user.setRole(rs.getString("role"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return user;
+    }
 }

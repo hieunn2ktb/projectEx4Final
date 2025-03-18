@@ -2,6 +2,7 @@ package ks.training.service;
 
 import ks.training.dao.CustomerActivityDao;
 import ks.training.dto.HistoryViewDto;
+import ks.training.entity.CustomerActivity;
 import ks.training.utils.DatabaseConnection;
 
 import java.sql.Connection;
@@ -40,4 +41,8 @@ public class CustomerActivityService {
         }
         return null;
     }
+    public List<CustomerActivity> customerActivities(int userId, int propertyId){
+        return customerActivityDao.activityList(userId,propertyId);
+    }
+
 }

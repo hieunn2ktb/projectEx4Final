@@ -7,17 +7,36 @@ public class TransactionResponseDto {
     private String transactionType;
     private String status;
     private Timestamp createdAt;
-
+    private int propertyId;
+    private int userId;
     public TransactionResponseDto() {
     }
 
-    public TransactionResponseDto(int id, String buyerName, String propertyName, String transactionType, String status, Timestamp createdAt) {
+    public TransactionResponseDto(int id, String buyerName, String propertyName, String transactionType, String status, Timestamp createdAt, int propertyId, int userId) {
         this.id = id;
         this.buyerName = buyerName;
         this.propertyName = propertyName;
         this.transactionType = transactionType;
         this.status = status;
         this.createdAt = createdAt;
+        this.propertyId = propertyId;
+        this.userId = userId;
+    }
+
+    public int getPropertyId() {
+        return propertyId;
+    }
+
+    public void setPropertyId(int propertyId) {
+        this.propertyId = propertyId;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public int getId() {
@@ -66,5 +85,19 @@ public class TransactionResponseDto {
 
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
+    }
+
+    @Override
+    public String toString() {
+        return "TransactionResponseDto{" +
+                "id=" + id +
+                ", buyerName='" + buyerName + '\'' +
+                ", propertyName='" + propertyName + '\'' +
+                ", transactionType='" + transactionType + '\'' +
+                ", status='" + status + '\'' +
+                ", createdAt=" + createdAt +
+                ", propertyId=" + propertyId +
+                ", userId=" + userId +
+                '}';
     }
 }

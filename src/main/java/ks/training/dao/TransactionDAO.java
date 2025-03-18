@@ -73,10 +73,10 @@ public class TransactionDAO {
 
     public List<TransactionResponseDto> getAllTransactions(String status, String buyerName, String startDate, String endDate, int page, int pageSize) throws SQLException {
         List<TransactionResponseDto> transactions = new ArrayList<>();
-        String sql = "SELECT t.id, u.full_name AS buyer_name, p.title AS property_name, t.transaction_type, t.status, t.created_at\n" +
-                "                    FROM transactions t \n" +
-                "                    JOIN users u ON t.buyer_id = u.id\n" +
-                "                    JOIN properties p ON t.property_id = p.id where 1=1";
+        String sql = "SELECT t.id, u.full_name AS buyer_name, p.title AS property_name, t.transaction_type, t.status, t.created_at ,p.id as propertyId ,u.id as userId\n" +
+                "                              FROM transactions t \n" +
+                "                              JOIN users u ON t.buyer_id = u.id\n" +
+                "                              JOIN properties p ON t.property_id = p.id where 1=1";
         int offset = (page - 1) * pageSize;
         List<Object> params = new ArrayList<>();
         if (status != null && !status.isEmpty()) {
@@ -85,7 +85,7 @@ public class TransactionDAO {
         }
 
         if (buyerName != null && !buyerName.isEmpty()) {
-            sql += " AND u.full_name = ?";
+            sql += " AND u.email = ?";
             params.add(buyerName);
         }
 
@@ -112,7 +112,9 @@ public class TransactionDAO {
                             rs.getString("property_name"),
                             rs.getString("transaction_type"),
                             rs.getString("status"),
-                            rs.getTimestamp("created_at")
+                            rs.getTimestamp("created_at"),
+                            rs.getInt("propertyId"),
+                            rs.getInt("userId")
                     ));
                 }
             }
@@ -120,11 +122,11 @@ public class TransactionDAO {
         return transactions;
     }
 
-    public int countTransaction(String status, String buyerName, String startDate, String endDate){
+    public int countTransaction(String status, String buyerName, String startDate, String endDate) {
         String sql = "SELECT COUNT(*) AS total_transactions\n" +
                 "FROM transactions t \n" +
                 "JOIN users u ON t.buyer_id = u.id\n" +
-                "JOIN properties p ON t.property_id = p.id";
+                "JOIN properties p ON t.property_id = p.id WHERE 1=1";
 
         List<Object> params = new ArrayList<>();
         if (endDate != null && startDate != null && !startDate.isEmpty() && !endDate.isEmpty()) {
@@ -135,12 +137,12 @@ public class TransactionDAO {
 
         if (status != null && !status.isEmpty()) {
             sql += " AND t.status = ?";
-            params.add( status );
+            params.add(status);
         }
 
         if (buyerName != null && !buyerName.isEmpty()) {
-            sql += "AND u.full_name = ?";
-            params.add( buyerName );
+            sql += " AND u.email = ?";
+            params.add(buyerName);
         }
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -160,6 +162,7 @@ public class TransactionDAO {
         }
         return 0;
     }
+
     public boolean updateTransactionStatus(int transactionId, String newStatus) throws SQLException {
         boolean result = false;
         try (Connection conn = DatabaseConnection.getConnection()) {
@@ -167,10 +170,11 @@ public class TransactionDAO {
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, newStatus);
             stmt.setInt(2, transactionId);
-            result =  stmt.executeUpdate() > 0;
+            result = stmt.executeUpdate() > 0;
         }
         return result;
     }
+
     public String getBuyerEmail(int transactionId) {
         String sql = "SELECT u.email FROM users u JOIN transactions t ON u.id = t.buyer_id WHERE t.id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -184,5 +188,34 @@ public class TransactionDAO {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public TransactionResponseDto getTransactionById(int id) {
+        String sql = "SELECT t.id, u.full_name AS buyer_name, p.title AS property_name, t.transaction_type, t.status, t.created_at ,p.id as propertyId ,u.id as userId\n" +
+                "        FROM transactions t\n" +
+                "JOIN users u ON t.buyer_id = u.id\n" +
+                "        JOIN properties p ON t.property_id = p.id where t.id = ?";
+        TransactionResponseDto transaction = null;
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    transaction = new TransactionResponseDto(
+                            rs.getInt("id"),
+                            rs.getString("buyer_name"),
+                            rs.getString("property_name"),
+                            rs.getString("transaction_type"),
+                            rs.getString("status"),
+                            rs.getTimestamp("created_at"),
+                            rs.getInt("propertyId"),
+                            rs.getInt("userId")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return transaction;
     }
 }

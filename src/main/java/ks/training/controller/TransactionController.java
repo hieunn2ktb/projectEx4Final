@@ -10,10 +10,11 @@ import jakarta.servlet.http.HttpSession;
 import ks.training.dto.HistoryViewDto;
 import ks.training.dto.TransactionDto;
 import ks.training.dto.TransactionResponseDto;
+import ks.training.entity.CustomerActivity;
+import ks.training.entity.Property;
+import ks.training.entity.Transaction;
 import ks.training.entity.User;
-import ks.training.service.CustomerActivityService;
-import ks.training.service.EmailService;
-import ks.training.service.TransactionService;
+import ks.training.service.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -24,10 +25,14 @@ import java.util.List;
 public class TransactionController extends HttpServlet {
     private TransactionService transactionService;
     private CustomerActivityService customerActivityService;
+    private UserService userService;
+    private PropertyService propertyService;
 
     public TransactionController() {
         this.transactionService = new TransactionService();
         this.customerActivityService = new CustomerActivityService();
+        this.userService = new UserService();
+        this.propertyService = new PropertyService();
     }
 
     @Override
@@ -76,10 +81,28 @@ public class TransactionController extends HttpServlet {
             case "viewHistory":
                 historyView(req, resp);
                 break;
+            case "userDetail":
+                userDetail(req, resp);
+                break;
+            case "propertyDetail":
+                propertyDetail(req, resp);
+            case "detailHistory":
+                detailHistory(req, resp);
+                break;
             default:
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Hành động không hợp lệ");
                 break;
         }
+    }
+
+    private void detailHistory(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        int userId = Integer.parseInt(req.getParameter("customerId"));
+        int propertyId = Integer.parseInt(req.getParameter("propertyId"));
+
+        List<CustomerActivity> customerActivityList = customerActivityService.customerActivities(userId, propertyId);
+
+        req.setAttribute("customerActivityList", customerActivityList);
+        req.getRequestDispatcher("transaction/viewHistoryTime.jsp").forward(req, resp);
     }
 
     private void showConfirmPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -87,7 +110,7 @@ public class TransactionController extends HttpServlet {
         int buyerId = Integer.parseInt(req.getParameter("buyerId"));
 
         String transactionType = req.getParameter("transactionType");
-        req.setAttribute("msg","");
+        req.setAttribute("msg", "");
         TransactionDto transactionDto = transactionService.getPropertyById(propertyId);
         req.setAttribute("transactionDto", transactionDto);
         req.setAttribute("transactionType", transactionType);
@@ -95,7 +118,7 @@ public class TransactionController extends HttpServlet {
         String formattedPrice = decimalFormat.format(transactionDto.getPrice());
         req.setAttribute("formattedPrice", formattedPrice);
 
-        req.getRequestDispatcher("/transaction/confirm-transaction.jsp").forward(req, resp);
+        req.getRequestDispatcher("/transaction/confirmTransaction.jsp").forward(req, resp);
     }
 
     private void confirmTransaction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -123,10 +146,10 @@ public class TransactionController extends HttpServlet {
         String url = "";
         if (!check) {
             transactionService.processTransaction(propertyId, buyerId, sellerId, transactionType);
-            url = "transaction/transaction-success.jsp";
+            url = "transaction/transactionSuccess.jsp";
         } else {
             msg = "Bất động sản đã có giao dịch vui lòng chọn bất động sản khác ";
-            url = "transaction/confirm-transaction.jsp";
+            url = "transaction/confirmTransaction.jsp";
         }
         request.setAttribute("msg", msg);
         RequestDispatcher rd = request.getRequestDispatcher(url);
@@ -144,9 +167,11 @@ public class TransactionController extends HttpServlet {
         int recordsPerPage = 10;
         int currentPage = 1;
         String status = request.getParameter("status");
-        String buyerName = request.getParameter("buyerName");
+        String buyerEmail = request.getParameter("email");
+        System.out.println(buyerEmail);
         String startDate = request.getParameter("startDate");
         String endDate = request.getParameter("endDate");
+        String buyerName = request.getParameter("buyerName");
 
         String pageParam = request.getParameter("page");
         if (pageParam != null && pageParam.matches("\\d+")) {
@@ -157,7 +182,7 @@ public class TransactionController extends HttpServlet {
         }
 
         try {
-            int totalRecords = transactionService.countTransaction(status, buyerName, startDate, endDate);
+            int totalRecords = transactionService.countTransaction(status, buyerEmail, startDate, endDate);
             int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
 
             if (totalPages == 0) {
@@ -166,8 +191,11 @@ public class TransactionController extends HttpServlet {
             if (currentPage > totalPages) {
                 currentPage = totalPages;
             }
-            List<TransactionResponseDto> properties = transactionService.findTransactionByPage(status, buyerName, startDate, endDate, currentPage, recordsPerPage);
-            request.setAttribute("properties", properties);
+            List<TransactionResponseDto> transactions = transactionService.findTransactionByPage(status, buyerEmail, startDate, endDate, currentPage, recordsPerPage);
+            System.out.println("danh sach transaction: ");
+            transactions.forEach(System.out::println);
+            System.out.println("het ");
+            request.setAttribute("transactions", transactions);
             request.setAttribute("currentPage", currentPage);
             request.setAttribute("totalPages", totalPages);
             request.setAttribute("startDate", startDate);
@@ -216,8 +244,47 @@ public class TransactionController extends HttpServlet {
 
         List<HistoryViewDto> viewCount = customerActivityService.countViewHistory();
         request.setAttribute("viewCount", viewCount);
-        request.getRequestDispatcher("/transaction/history-view.jsp").forward(request, response);
+        request.getRequestDispatcher("/transaction/historyView.jsp").forward(request, response);
     }
 
+    private void userDetail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int userId = Integer.parseInt(request.getParameter("userId"));
+        User user = userService.userDetail(userId);
+        request.setAttribute("userDetail", user);
+        request.getRequestDispatcher("user/detailUser.jsp").forward(request, response);
+    }
 
+    private void propertyDetail(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        HttpSession session = request.getSession(false);
+        User user = (session != null) ? (User) session.getAttribute("User") : null;
+
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+            return;
+        }
+        int id = Integer.parseInt(request.getParameter("transactionId"));
+        TransactionResponseDto transaction = transactionService.getTransactionById(id);
+
+        String propertyIdStr = request.getParameter("propertyId");
+        int propertyId = 0;
+        try {
+            if (propertyIdStr != null) {
+                propertyId = Integer.parseInt(propertyIdStr);
+            }
+        } catch (NumberFormatException e) {
+            return;
+        }
+
+        Property property = propertyService.findPropertyById(propertyId);
+        List<byte[]> images = propertyService.getImagesByPropertyId(propertyId);
+
+        customerActivityService.logCustomerActivity(user.getId(), propertyId);
+
+        request.setAttribute("property", property);
+        request.setAttribute("images", images);
+        request.setAttribute("user", user);
+        request.setAttribute("transaction", transaction);
+
+        request.getRequestDispatcher("/property/PropertyDetail.jsp").forward(request, response);
+    }
 }

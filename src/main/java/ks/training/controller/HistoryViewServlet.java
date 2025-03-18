@@ -1,7 +1,4 @@
 package ks.training.controller;
-
-
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -33,6 +30,7 @@ public class HistoryViewServlet extends HttpServlet {
 
         List<HistoryViewDto> viewCount = customerActivityService.countViewHistory();
         request.setAttribute("viewCount", viewCount);
-        request.getRequestDispatcher("/transaction/history-view.jsp").forward(request, response);
+        request.getRequestDispatcher("/transaction/historyView.jsp").forward(request, response);
     }
+
 }

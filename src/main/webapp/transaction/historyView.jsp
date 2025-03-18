@@ -1,10 +1,6 @@
-<%@ page import="java.util.List" %>
-<%@ page import="ks.training.dto.TransactionResponseDto" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="ks.training.entity.User" %>
-<%@ page import="ks.training.service.CustomerActivityService" %>
-<%@ page import="ks.training.dto.HistoryViewDto" %>
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
+<%@ page import="java.util.List" %>
+<%@ page import="ks.training.dto.HistoryViewDto" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -19,7 +15,6 @@
             justify-content: center;
             margin-top: 20px;
         }
-
         .pagination a {
             padding: 8px 16px;
             margin: 0 4px;
@@ -28,32 +23,15 @@
             color: black;
             background-color: white;
         }
-
         .pagination a.active {
             font-weight: bold;
             background-color: lightgray;
         }
-
         .pagination a:hover {
             background-color: #ddd;
         }
-
     </style>
 </head>
-<%
-    HttpSession sessionUser = request.getSession(false);
-    Object obj = session.getAttribute("User");
-    User user = null;
-    if (sessionUser == null || obj == null) {
-        response.sendRedirect(request.getContextPath() + "/user/login.jsp");
-        return;
-    }
-    CustomerActivityService customerActivityService = new CustomerActivityService();
-    List<HistoryViewDto> viewCount = customerActivityService.countViewHistory();
-    if (viewCount == null) {
-        viewCount = new ArrayList<>();
-    }
-%>
 <body>
 <div class="container mt-4">
     <h2 class="text-center mb-4">Lịch sử khách hàng xem Bất động sản</h2>
@@ -65,29 +43,40 @@
             <th>Số điện thoại</th>
             <th>Giá</th>
             <th>Số lần xem</th>
+            <th>Chi tiết thời gian khách hàng xem</th>
         </tr>
         </thead>
         <tbody>
-        <%for(HistoryViewDto hv : viewCount){ %>
+        <%
+            List<HistoryViewDto> viewCount = (List<HistoryViewDto>) request.getAttribute("viewCount");
+            if (viewCount != null && !viewCount.isEmpty()) {
+                for (HistoryViewDto hv : viewCount) {
+        %>
         <tr>
             <td><%= hv.getCustomerName() %></td>
             <td><%= hv.getTitleProperty() %></td>
             <td><%= hv.getPhone() %></td>
             <td><%= hv.getPrice() %></td>
             <td><%= hv.getCountView() %></td>
+            <td>
+                <form action="transaction" method="post">
+                    <input type="hidden" name="action" value="detailHistory">
+                    <input type="hidden" name="customerId" value="<%=hv.getUserId()%>">
+                    <input type="hidden" name="propertyId" value="<%=hv.getPropertyId()%>">
+                    <button type="submit" class="btn btn-primary">Xem</button>
+                </form>
+            </td>
         </tr>
         <%
             }
-            if (viewCount.isEmpty()){
+        } else {
         %>
         <tr>
-            <td colspan="7" class="text-center text-muted">Không có giao dịch nào</td>
+            <td colspan="5" class="text-center text-muted">Không có giao dịch nào</td>
         </tr>
         <% } %>
         </tbody>
     </table>
-
-
 </div>
 
 <!-- Bootstrap 5 JavaScript -->

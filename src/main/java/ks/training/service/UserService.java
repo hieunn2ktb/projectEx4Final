@@ -55,4 +55,7 @@ public class UserService {
         return result;
     }
 
+    public User userDetail(int userId){
+        return userDao.userDetail(userId);
+    }
 }
