@@ -7,16 +7,31 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 public class ReportDAO {
-    public int getTransactionCountByMonth(int month, int year,String type) {
-        String sql = "SELECT COUNT(*) FROM transactions WHERE MONTH(created_at) = ? AND YEAR(created_at) = ?";
-        String baseSql = type.equals("Tất cả trạng thái") ? sql : sql + " AND status = ?";
+    public int getTransactionCountByMonth(Integer month, int year, String type) {
+        String sql = "SELECT COUNT(*) FROM transactions WHERE YEAR(created_at) = ?";
+
+        if (month != null) {
+            sql += " AND MONTH(created_at) = ?";
+        }
+
+        if (!type.equals("Tất cả trạng thái")) {
+            sql += " AND status = ?";
+        }
+
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(baseSql)) {
-            stmt.setInt(1, month);
-            stmt.setInt(2, year);
-            if (!type.equals("Tất cả trạng thái")) {
-                stmt.setString(3, type);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            int paramIndex = 1;
+            stmt.setInt(paramIndex++, year);
+
+            if (month != null) {
+                stmt.setInt(paramIndex++, month);
             }
+
+            if (!type.equals("Tất cả trạng thái")) {
+                stmt.setString(paramIndex++, type);
+            }
+
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
@@ -26,4 +41,5 @@ public class ReportDAO {
         }
         return 0;
     }
+
 }

@@ -28,7 +28,10 @@ public class ReportServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/user/login.jsp");
             return;
         }
-        int month = Integer.parseInt(request.getParameter("month"));
+
+        String monthParam = request.getParameter("month");
+        Integer month = (monthParam != null && !monthParam.isEmpty()) ? Integer.parseInt(monthParam) : null;
+
         int year = Integer.parseInt(request.getParameter("year"));
         String type = request.getParameter("status");
         int transactionCount = reportDAO.getTransactionCountByMonth(month, year,type);

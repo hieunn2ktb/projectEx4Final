@@ -21,7 +21,8 @@
                     <form action="${pageContext.request.contextPath}/report" method="post">
                         <div class="mb-3">
                             <label for="month" class="form-label">Chọn tháng:</label>
-                            <select class="form-select" name="month" id="month" required>
+                            <select class="form-select" name="month" id="month">
+                                <option value="">Tất cả các tháng</option>
                                 <% for(int i = 1; i <= 12; i++) { %>
                                 <option value="<%= i %>"><%= i %></option>
                                 <% } %>
