@@ -1,4 +1,5 @@
 package ks.training.controller;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -28,8 +29,19 @@ public class HistoryViewServlet extends HttpServlet {
             return;
         }
 
-        List<HistoryViewDto> viewCount = customerActivityService.countViewHistory();
-        request.setAttribute("viewCount", viewCount);
+        int page = 1;
+        int recordsPerPage = 10;
+        if (request.getParameter("page") != null) {
+            page = Integer.parseInt(request.getParameter("page"));
+        }
+
+
+        List<HistoryViewDto> listView = customerActivityService.ListViewHistory(page, recordsPerPage);
+        int totalPages = customerActivityService.getTotalPages();
+
+        request.setAttribute("viewCount", listView);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
         request.getRequestDispatcher("/transaction/historyView.jsp").forward(request, response);
     }
 

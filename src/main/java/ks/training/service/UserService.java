@@ -1,11 +1,13 @@
 package ks.training.service;
 
 import ks.training.dao.UserDao;
+import ks.training.dto.UserDto;
 import ks.training.entity.User;
 import ks.training.utils.DatabaseConnection;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 public class UserService {
     public UserDao userDao;
@@ -57,5 +59,15 @@ public class UserService {
 
     public User userDetail(int userId){
         return userDao.userDetail(userId);
+    }
+    public List<UserDto> listUser(int page, int recordsPerPage){
+        return userDao.listUserByPage(page,recordsPerPage);
+    }
+    public boolean updateUserRole(int userId, int newRole){
+        return userDao.updateUserRole(userId,newRole);
+    }
+
+    public int countUsers() {
+        return userDao.countTotalUsers();
     }
 }

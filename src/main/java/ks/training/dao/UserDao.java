@@ -1,10 +1,13 @@
 package ks.training.dao;
 
+import ks.training.dto.UserDto;
 import ks.training.entity.User;
 import ks.training.utils.DatabaseConnection;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDao {
 
@@ -175,5 +178,67 @@ public class UserDao {
             e.printStackTrace();
         }
         return user;
+    }
+    public List<UserDto> listUserByPage(int page, int recordsPerPage) {
+        String sql = "SELECT u.id, u.full_name, u.email, u.phone, u.address, r.name " +
+                "FROM users u " +
+                "JOIN user_roles ur ON u.id = ur.user_id " +
+                "JOIN roles r ON r.id = ur.role_id " +
+                "LIMIT ? OFFSET ?";
+
+        List<UserDto> userDtos = new ArrayList<>();
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            int start = (page - 1) * recordsPerPage;
+
+            pstmt.setInt(1, recordsPerPage);
+            pstmt.setInt(2, start);
+
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                UserDto userDto = new UserDto();
+                userDto.setId(rs.getInt("id"));
+                userDto.setUsername(rs.getString("full_name"));
+                userDto.setEmail(rs.getString("email"));
+                userDto.setPhone(rs.getString("phone"));
+                userDto.setAddress(rs.getString("address"));
+                userDto.setRole(rs.getString("name"));
+                userDtos.add(userDto);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return userDtos;
+    }
+
+    public boolean updateUserRole(int userId, int newRole) {
+        String sql = "Update user_roles SET role_id = ? WHERE user_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, newRole);
+            stmt.setInt(2, userId);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public int countTotalUsers() {
+        String query = "SELECT count(*) FROM users u\n" +
+                "                JOIN user_roles ur ON u.id = ur.user_id \n" +
+                "                JOIN roles r ON r.id = ur.role_id ;";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }

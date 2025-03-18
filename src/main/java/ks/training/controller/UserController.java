@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import ks.training.dao.CustomerActivityDao;
 import ks.training.dto.PropertyDto;
+import ks.training.dto.UserDto;
 import ks.training.entity.User;
 import ks.training.service.CustomerActivityService;
 import ks.training.service.PropertyService;
@@ -48,6 +49,9 @@ public class UserController extends HttpServlet {
             case "register":
                 request.getRequestDispatcher("/user/register.jsp").forward(request, response);
                 break;
+            case "showAllUser":
+                showListUser(request,response);
+                break;
             case "editUser":
                 request.getRequestDispatcher("/user/editUser.jsp").forward(request, response);
                 break;
@@ -63,7 +67,6 @@ public class UserController extends HttpServlet {
             response.sendRedirect("index.jsp");
             return;
         }
-
         switch (action) {
             case "editUser":
                 editUser(request, response);
@@ -74,7 +77,25 @@ public class UserController extends HttpServlet {
             case "login":
                 login(request, response);
                 break;
+            case "updateRole":
+                updateRole(request, response);
+                break;
         }
+    }
+
+    private void updateRole(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        int userId = Integer.parseInt(request.getParameter("userId"));
+        int newRole = Integer.parseInt(request.getParameter("role"));
+
+        UserService userService = new UserService();
+        boolean success = userService.updateUserRole(userId, newRole);
+
+        if (success) {
+            request.setAttribute("message", "Cập nhật role thành công!");
+        } else {
+            request.setAttribute("error", "Cập nhật role thất bại!");
+        }
+        response.sendRedirect("user?action=showAllUser");
     }
 
     private void editUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -235,5 +256,30 @@ public class UserController extends HttpServlet {
             return null;
         }
         return user;
+    }
+    private void showListUser(HttpServletRequest request, HttpServletResponse response){
+        int recordsPerPage = 5;
+        int currentPage = 1;
+
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && pageParam.matches("\\d+")) {
+            currentPage = Integer.parseInt(pageParam);
+            if (currentPage < 1) currentPage = 1;
+        }
+        int totalRecords = userService.countUsers();
+        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+        if (totalPages == 0) totalPages = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        List<UserDto> list = userService.listUser(currentPage,recordsPerPage);
+        request.setAttribute("listUser",list);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        RequestDispatcher rd = getServletContext().getRequestDispatcher("/user/listUserView.jsp");
+        try {
+            rd.forward(request, response);
+        } catch (ServletException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

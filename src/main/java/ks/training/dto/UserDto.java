@@ -4,9 +4,27 @@ public class UserDto {
     private int id;
     private String username;
     private String email;
+    private String phone;
     private String role;
+    private String address;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
     public UserDto() {
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public UserDto(int id, String username, String password, String role) {

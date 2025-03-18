@@ -12,7 +12,6 @@ import ks.training.dto.TransactionDto;
 import ks.training.dto.TransactionResponseDto;
 import ks.training.entity.CustomerActivity;
 import ks.training.entity.Property;
-import ks.training.entity.Transaction;
 import ks.training.entity.User;
 import ks.training.service.*;
 
@@ -51,6 +50,9 @@ public class TransactionController extends HttpServlet {
                 break;
             case "viewHistory":
                 historyView(req, resp);
+                break;
+            case "detailHistory":
+                detailHistory(req, resp);
                 break;
             default:
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Hành động không hợp lệ");
@@ -95,15 +97,53 @@ public class TransactionController extends HttpServlet {
         }
     }
 
-    private void detailHistory(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        int userId = Integer.parseInt(req.getParameter("customerId"));
-        int propertyId = Integer.parseInt(req.getParameter("propertyId"));
+    private void detailHistory(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = request.getSession();
 
-        List<CustomerActivity> customerActivityList = customerActivityService.customerActivities(userId, propertyId);
+        int recordsPerPage = 5;
+        int currentPage = 1;
 
-        req.setAttribute("customerActivityList", customerActivityList);
-        req.getRequestDispatcher("transaction/viewHistoryTime.jsp").forward(req, resp);
+        if ("POST".equalsIgnoreCase(request.getMethod())) {
+            try {
+                int userId = Integer.parseInt(request.getParameter("customerId"));
+                int propertyId = Integer.parseInt(request.getParameter("propertyId"));
+
+                session.setAttribute("userId", userId);
+                session.setAttribute("propertyId", propertyId);
+            } catch (NumberFormatException e) {
+                resp.sendRedirect("error.jsp?message=Invalid+ID");
+                return;
+            }
+        }
+
+        Integer userId = (Integer) session.getAttribute("userId");
+        Integer propertyId = (Integer) session.getAttribute("propertyId");
+
+        if (userId == null || propertyId == null) {
+            resp.sendRedirect("error.jsp?message=Session+Expired");
+            return;
+        }
+
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && pageParam.matches("\\d+")) {
+            currentPage = Integer.parseInt(pageParam);
+        }
+        if (currentPage < 1) currentPage = 1;
+
+        int totalRecords = customerActivityService.countCustomer(userId, propertyId);
+        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+        totalPages = Math.max(totalPages, 1);
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        List<CustomerActivity> customerActivityList = customerActivityService.customerActivities(userId, propertyId, currentPage, recordsPerPage);
+
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("customerActivityList", customerActivityList);
+
+        request.getRequestDispatcher("transaction/viewHistoryTime.jsp").forward(request, resp);
     }
+
 
     private void showConfirmPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         int propertyId = Integer.parseInt(req.getParameter("propertyId"));
@@ -242,8 +282,24 @@ public class TransactionController extends HttpServlet {
             return;
         }
 
-        List<HistoryViewDto> viewCount = customerActivityService.countViewHistory();
-        request.setAttribute("viewCount", viewCount);
+        int recordsPerPage = 5;
+        int currentPage = 1;
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && pageParam.matches("\\d+")) {
+            currentPage = Integer.parseInt(pageParam);
+            if (currentPage < 1) currentPage = 1;
+        }
+        int totalRecords = customerActivityService.getTotalPages();
+        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+        if (totalPages == 0) totalPages = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+
+        List<HistoryViewDto> listView = customerActivityService.ListViewHistory(currentPage, recordsPerPage);
+
+        request.setAttribute("viewCount", listView);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
         request.getRequestDispatcher("/transaction/historyView.jsp").forward(request, response);
     }
 

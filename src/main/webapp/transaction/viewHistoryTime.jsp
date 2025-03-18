@@ -14,7 +14,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Danh sách hoạt động khách hàng</title>
 
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -59,11 +58,42 @@
             }
         %>
         </tbody>
-        <button type="button" class="btn btn-secondary" onclick="history.back();">Quay lại</button>
+        <a type="button" class="btn btn-secondary" href="transaction?action=viewHistory">Quay lại</a>
     </table>
+    <%
+        Integer currentPage = (Integer) request.getAttribute("currentPage");
+        Integer totalPages = (Integer) request.getAttribute("totalPages");
+
+        if (currentPage == null) currentPage = 1;
+        if (totalPages == null) totalPages = 1;
+    %>
+    <div class="container mt-3">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <c:if test="${currentPage > 1}">
+                    <li class="page-item">
+                        <a class="page-link" href="transaction?action=detailHistory&page=${currentPage - 1}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo; Trang trước</span>
+                        </a>
+                    </li>
+                </c:if>
+
+                <li class="page-item disabled">
+                    <span class="page-link">Trang ${currentPage} / ${totalPages}</span>
+                </li>
+
+                <c:if test="${currentPage < totalPages}">
+                    <li class="page-item">
+                        <a class="page-link" href="transaction?action=detailHistory&page=${currentPage + 1}" aria-label="Next">
+                            <span aria-hidden="true">Trang sau &raquo;</span>
+                        </a>
+                    </li>
+                </c:if>
+            </ul>
+        </nav>
+    </div>
 </div>
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

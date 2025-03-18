@@ -3,6 +3,8 @@
 <%@ page import="java.util.List, ks.training.dto.PropertyDto" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="java.text.NumberFormat" %>
+<%@ page import="java.util.Locale" %>
 <%
     List<PropertyDto> properties = (List<PropertyDto>) request.getAttribute("properties");
     if (properties == null) properties = new ArrayList<>();
@@ -226,6 +228,7 @@
             <li><a href="report" class="btn">Báo cáo giao dịch</a></li>
             <li><a href="${pageContext.request.contextPath}/transaction?action=viewHistory" class="btn">Lịch sử BĐS
                 khách hàng đã xem</a></li>
+            <li><a href="${pageContext.request.contextPath}/user?action=showAllUser" class="btn">Danh sách User</a></li>
             <%
                     }
                 }
@@ -273,8 +276,11 @@
             <div class="property-info">
                 <h3><%= property.getTitle() %>
                 </h3>
-                <p>Giá: <%=property.getPrice()%>
-                </p>
+                <%
+                    NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+                    String formattedPrice = currencyFormatter.format(property.getPrice());
+                %>
+                <p>Giá: <%= formattedPrice %></p>
                 <p>Diện tích: <%=property.getAcreage()%>
                 </p>
                 <p>Địa chỉ: <%= property.getAddress() %>

@@ -6,6 +6,8 @@ import ks.training.entity.CustomerActivity;
 import ks.training.utils.DatabaseConnection;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -33,16 +35,28 @@ public class CustomerActivityService {
 
     }
 
-    public List<HistoryViewDto> countViewHistory() {
+    public List<HistoryViewDto> ListViewHistory(int page, int recordsPerPage) {
         try (Connection conn = DatabaseConnection.getConnection()) {
-            return customerActivityDao.historyView(conn);
+            return customerActivityDao.historyView(conn,page,recordsPerPage);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
-    public List<CustomerActivity> customerActivities(int userId, int propertyId){
-        return customerActivityDao.activityList(userId,propertyId);
+    public List<CustomerActivity> customerActivities(int userId, int propertyId ,int page, int recordsPerPage){
+        return customerActivityDao.activityList(userId,propertyId,page,recordsPerPage);
     }
+    public int getTotalPages(){
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            return customerActivityDao.getTotalPages(conn);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    public int countCustomer(int userId, int propertyId){
+        return customerActivityDao.countCustomer(userId,propertyId);
+    }
+
 
 }
