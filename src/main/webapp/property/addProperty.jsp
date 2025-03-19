@@ -55,7 +55,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Thêm</button>
-        <a href="index.jsp" class="btn btn-secondary">Hủy</a>
+        <a href="home" class="btn btn-secondary">Hủy</a>
     </form>
 </div>
 </body>

@@ -41,5 +41,37 @@ public class ReportDAO {
         }
         return 0;
     }
+    public long getTotalRevenueByMonth(Integer month, int year) {
+        String sql = "SELECT SUM(p.price) as total " +
+                "FROM properties p " +
+                "JOIN transactions t ON p.id = t.property_id " +
+                "WHERE t.status = 'Đã hoàn thành' " +
+                "AND YEAR(t.created_at) = ?";
+
+        if (month != null) {
+            sql += " AND MONTH(t.created_at) = ?";
+        }
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            int paramIndex = 1;
+            stmt.setInt(paramIndex++, year);
+
+            if (month != null) {
+                stmt.setInt(paramIndex++, month);
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getObject(1, Long.class) != null ? rs.getLong(1) : 0;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
 
 }

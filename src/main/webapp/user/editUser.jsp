@@ -95,6 +95,8 @@
                 <hr/>
                 <input class="btn btn-primary form-control" type="submit" value="Lưu thông tin"
                        name="submit" id="submit"/>
+                <br>
+                <a href="home" class="btn btn-success">Hủy</a>
             </div>
     </form>
 </div>

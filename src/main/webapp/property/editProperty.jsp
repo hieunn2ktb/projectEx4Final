@@ -86,7 +86,7 @@
             <input type="file" name="images" class="form-control" multiple>
         </div>
         <button type="submit" class="btn btn-success">Cập nhật</button>
-        <a href="home" class="btn btn-secondary">Hủy</a>
+        <a href="home" class="btn btn-success">Hủy</a>
     </form>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

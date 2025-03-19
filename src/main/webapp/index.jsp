@@ -225,7 +225,8 @@
             <% if ("Employee".equals(user.getRole())) { %>
             <li><a href="propertyMng?action=viewAddProperty" class="btn">Thêm Bất Động Sản</a></li>
             <li><a href="transaction?action=allTransaction" class="btn">Quản lý giao dịch</a></li>
-            <li><a href="report" class="btn">Báo cáo giao dịch</a></li>
+            <li><a href="report?action=reportCount" class="btn">Báo cáo giao dịch</a></li>
+            <li><a href="report?action=reportsRevenue" class="btn">Báo cáo doanh thu</a></li>
             <li><a href="${pageContext.request.contextPath}/transaction?action=viewHistory" class="btn">Lịch sử BĐS
                 khách hàng đã xem</a></li>
             <li><a href="${pageContext.request.contextPath}/user?action=showAllUser" class="btn">Danh sách User</a></li>
@@ -330,7 +331,7 @@
 
         <c:if test="${currentPage < totalPages}">
             <a href="${pageContext.request.contextPath}/home?page=${currentPage + 1}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchAddress=${searchAddress}&searchPropertyType=${searchPropertyType}">
-                Tiếp &raquo;
+                Tiếp &raquo;s
             </a>
         </c:if>
     </div>

@@ -4,7 +4,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Báo cáo giao dịch</title>
+    <title>Báo cáo doanh thu</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -12,6 +12,7 @@
 
 <div class="container">
     <div class="row justify-content-center">
+        <div class="col-md-6"></div>
         <div class="col-md-6">
             <div class="card shadow-lg">
                 <div class="card-header bg-primary text-white text-center">
@@ -19,55 +20,49 @@
                 </div>
                 <div class="card-body">
                     <form action="${pageContext.request.contextPath}/report" method="post">
-                        <input type="hidden" name="action" value="reportCount">
+                        <input type="hidden" name="action" value="reportsRevenue">
                         <div class="mb-3">
                             <label for="month" class="form-label">Chọn tháng:</label>
                             <select class="form-select" name="month" id="month">
                                 <option value="">Tất cả các tháng</option>
-                                <% for(int i = 1; i <= 12; i++) { %>
-                                <option value="<%= i %>"><%= i %></option>
+                                <% for (int i = 1; i <= 12; i++) { %>
+                                <option value="<%= i %>"><%= i %>
+                                </option>
                                 <% } %>
                             </select>
                         </div>
 
                         <div class="mb-3">
                             <label for="year" class="form-label">Chọn năm:</label>
-                            <input type="number" class="form-control" name="year" id="year" min="2000" max="2100" required>
+                            <input type="number" class="form-control" name="year" id="year" min="2000" max="2100"
+                                   required>
                         </div>
-
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Chọn trạng thái:</label>
-                            <select class="form-select" name="status" id="status">
-                                <option value="Tất cả trạng thái">Tất cả trạng thái</option>
-                                <option value="Đang xử lý">Đang xử lý</option>
-                                <option value="Đã hoàn thành">Đã hoàn thành</option>
-                            </select>
-                        </div>
-
                         <div class="text-center">
                             <button type="submit" class="btn btn-success w-100">Xem báo cáo</button>
                         </div>
-                        <div class="d-flex justify-content-center mt-3">
-                            <a href="home" class="btn btn-danger btn-lg px-4 shadow">
-                                Quay lại
-                            </a>
-                        </div>
                     </form>
+                    <div class="d-flex justify-content-center mt-3">
+                        <a href="home" class="btn btn-danger btn-lg px-4 shadow">
+                             Quay lại
+                        </a>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
 
-    <% Integer transactionCount = (Integer) request.getAttribute("transactionCount"); %>
-    <% if (transactionCount != null) { %>
+    <% Long total = (Long) request.getAttribute("total"); %>
+    <% if (total != null) { %>
     <div class="row justify-content-center mt-4">
         <div class="col-md-6">
             <div class="alert alert-info text-center">
-                <strong>Tổng số giao dịch:</strong> <%= transactionCount %>
+                <strong>Tổng số Tiền giao dịch:</strong> <%= total / 100000000%> <strong>Tỷ</strong>
             </div>
         </div>
     </div>
     <% } %>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
