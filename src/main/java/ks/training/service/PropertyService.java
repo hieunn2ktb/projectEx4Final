@@ -13,10 +13,18 @@ import java.util.List;
 
 public class PropertyService {
     private final PropertyDao propertyDao;
-
+    private String uploadRootPath;
 
     public PropertyService() {
         this.propertyDao = new PropertyDao();
+    }
+
+    public void setUploadRootPath(String uploadRootPath) {
+        this.uploadRootPath = uploadRootPath;
+    }
+
+    public String getUploadRootPath() {
+        return uploadRootPath;
     }
 
     public List<PropertyDto> findPropertiesByPage(String minPrice, String maxPrice, String searchAddress, String searchPropertyType, int page, int pageSize) throws SQLException {
@@ -27,23 +35,11 @@ public class PropertyService {
         return propertyDao.countProperties(minPrice, maxPrice, searchAddress, searchPropertyType);
     }
 
-    public boolean addProperty(PropertyResponse property) {
-        boolean isSuccess = false;
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            conn.setAutoCommit(false);
-            try {
-                propertyDao.addProperty(conn, property);
-                conn.commit();
-                isSuccess = true;
-            } catch (SQLException e) {
-                conn.rollback();
-                e.printStackTrace();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public int addProperty(PropertyResponse property, String uploadRootPath) {
+        if (property == null || property.getTitle() == null || property.getPrice() <= 0) {
+            throw new IllegalArgumentException("Thông tin bất động sản không hợp lệ!");
         }
-
-        return isSuccess;
+        return propertyDao.addProperty(property, uploadRootPath);
     }
 
 
@@ -52,25 +48,24 @@ public class PropertyService {
     }
 
     public boolean updateProperty(PropertyResponse property) {
-        boolean result = false;
+        if (uploadRootPath == null || uploadRootPath.isEmpty()) {
+            throw new IllegalStateException("Upload path chưa được thiết lập!");
+        }
+
         try (Connection conn = DatabaseConnection.getConnection()) {
             conn.setAutoCommit(false);
-            try {
-                boolean updated = propertyDao.updateProperty(conn, property);
-                if (!updated) {
-                    conn.rollback();
-                    return false;
-                }
+
+            boolean isUpdated = propertyDao.updateProperty(conn, property, uploadRootPath);
+            if (isUpdated) {
                 conn.commit();
-                result = true;
-            } catch (SQLException e) {
+                return true;
+            } else {
                 conn.rollback();
-                throw new RuntimeException("Lỗi khi cập nhật BĐS", e);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return result;
+        return false;
     }
 
 
@@ -98,7 +93,4 @@ public class PropertyService {
         return propertyDao.checkUser( userId, propertyId);
     };
 
-    public List<byte[]> getImagesByPropertyId(int propertyId) {
-        return propertyDao.getImagesByPropertyId(propertyId);
-    }
 }

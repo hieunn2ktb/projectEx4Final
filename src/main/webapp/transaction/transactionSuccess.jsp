@@ -22,6 +22,6 @@
 %>
 <body>
 <p class="success">🎉 Giao dịch đã được tạo thành công!</p>
-<a href="index.jsp">Quay lại Trang chủ</a>
+<a href="home">Quay lại Trang chủ</a>
 </body>
 </html>

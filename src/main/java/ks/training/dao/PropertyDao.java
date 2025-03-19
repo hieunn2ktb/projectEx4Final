@@ -5,6 +5,8 @@ import ks.training.dto.PropertyResponse;
 import ks.training.entity.Property;
 import ks.training.utils.DatabaseConnection;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
@@ -12,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PropertyDao {
-
+    private static final String UPLOAD_DIR = "uploads";
     public List<PropertyDto> findPropertiesByPage(String minPrice, String maxPrice, String searchAddress, String searchPropertyType, int page, int pageSize) throws SQLException {
         int offset = (page - 1) * pageSize;
         String sql = "SELECT p.id, p.image_url, p.title, p.price, p.description, \n" +
@@ -115,11 +117,13 @@ public class PropertyDao {
     }
 
 
-    public void addProperty(Connection conn, PropertyResponse property) {
+    public int addProperty(PropertyResponse property, String uploadRootPath) {
+        int propertyId = -1;
         String sql = "INSERT INTO properties (title, description, price, address, property_type, acreage, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        String uploadImage = "INSERT INTO property_images (property_id, image_data) VALUES (?, ?)";
+        String uploadImageSQL = "INSERT INTO property_images (property_id, image_url) VALUES (?, ?)";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, property.getTitle());
             pstmt.setString(2, property.getDescription());
             pstmt.setDouble(3, property.getPrice());
@@ -128,34 +132,57 @@ public class PropertyDao {
             pstmt.setDouble(6, property.getAcreage());
             pstmt.setInt(7, property.getCreatedBy());
 
-            int affectedRows = pstmt.executeUpdate();
-            List<InputStream> imageStreams = property.getImageStreams();
+            pstmt.executeUpdate();
 
-            if (affectedRows > 0) {
-                try (ResultSet rs = pstmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        int propertyId = rs.getInt(1);
-                        if (imageStreams != null && !imageStreams.isEmpty()) {
-                            for (InputStream imageStream : imageStreams) {
-                                try (PreparedStatement stmt = conn.prepareStatement(uploadImage)) {
-                                    stmt.setInt(1, propertyId);
-                                    stmt.setBlob(2, imageStream);
-                                    stmt.executeUpdate();
-                                }
-                            }
-                        }
-                    }
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    propertyId = rs.getInt(1);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            return -1;
         }
+
+        if (propertyId != -1 && property.getImageStreams() != null) {
+            File uploadDir = new File(uploadRootPath);
+
+            System.out.println("Upload directory path: " + uploadDir.getAbsolutePath());
+
+            if (!uploadDir.exists()) uploadDir.mkdirs();
+
+            for (InputStream imageStream : property.getImageStreams()) {
+                String fileName = "property_" + propertyId + "_" + System.currentTimeMillis() + ".jpg";
+                String filePath = uploadDir + File.separator + fileName;
+
+                try (FileOutputStream fos = new FileOutputStream(filePath)) {
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = imageStream.read(buffer)) != -1) {
+                        fos.write(buffer, 0, bytesRead);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                try (Connection conn = DatabaseConnection.getConnection();
+                     PreparedStatement stmt = conn.prepareStatement(uploadImageSQL)) {
+                    stmt.setInt(1, propertyId);
+                    stmt.setString(2, UPLOAD_DIR + "/" + fileName);
+                    stmt.executeUpdate();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return propertyId;
     }
 
-    public boolean updateProperty(Connection conn, PropertyResponse property) {
+    public boolean updateProperty(Connection conn, PropertyResponse property, String uploadRootPath) {
         String updatePropertySQL = "UPDATE properties SET title = ?, description = ?, price = ?, address = ?, property_type = ?, acreage = ? WHERE id = ?";
         String deleteImagesSQL = "DELETE FROM property_images WHERE property_id = ?";
-        String insertImageSQL = "INSERT INTO property_images (property_id, image_data) VALUES (?, ?)";
+        String insertImageSQL = "INSERT INTO property_images (property_id, image_url) VALUES (?, ?)";
 
         try {
             try (PreparedStatement pstmt = conn.prepareStatement(updatePropertySQL)) {
@@ -172,30 +199,51 @@ public class PropertyDao {
                     return false;
                 }
             }
+
             List<InputStream> imageStreams = property.getImageStreams();
             if (imageStreams != null && !imageStreams.isEmpty()) {
+
                 try (PreparedStatement deleteStmt = conn.prepareStatement(deleteImagesSQL)) {
                     deleteStmt.setInt(1, property.getId());
                     deleteStmt.executeUpdate();
                 }
 
-                try (PreparedStatement insertStmt = conn.prepareStatement(insertImageSQL)) {
-                    for (InputStream imageStream : imageStreams) {
-                        insertStmt.setInt(1, property.getId());
-                        insertStmt.setBlob(2, imageStream);
-                        insertStmt.executeUpdate();
-                        imageStream.close();
+                File uploadDir = new File(uploadRootPath + File.separator);
+                if (uploadDir.exists() && uploadDir.isDirectory()) {
+                    File[] files = uploadDir.listFiles((dir, name) -> name.startsWith("property_" + property.getId() + "_"));
+                    if (files != null) {
+                        for (File file : files) {
+                            file.delete();
+                        }
                     }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                }
+
+                for (InputStream imageStream : imageStreams) {
+                    String fileName = "property_" + property.getId() + "_" + System.currentTimeMillis() + ".jpg";
+                    String filePath = uploadDir + File.separator + fileName;
+
+                    try (FileOutputStream fos = new FileOutputStream(filePath)) {
+                        byte[] buffer = new byte[1024];
+                        int bytesRead;
+                        while ((bytesRead = imageStream.read(buffer)) != -1) {
+                            fos.write(buffer, 0, bytesRead);
+                        }
+                    }
+
+                    try (PreparedStatement insertStmt = conn.prepareStatement(insertImageSQL)) {
+                        insertStmt.setInt(1, property.getId());
+                        insertStmt.setString(2, "uploads/" + fileName);
+                        insertStmt.executeUpdate();
+                    }
                 }
             }
             return true;
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
         return false;
     }
+
 
     public boolean checkTransactionSQL(int id) {
         String checkTransactionSQL = "SELECT COUNT(*) FROM transactions WHERE property_id = ?";
@@ -251,16 +299,16 @@ public class PropertyDao {
         return property;
     }
 
-    public List<byte[]> getImagesByPropertyId(int propertyId) {
-        List<byte[]> images = new ArrayList<>();
-        String sql = "SELECT image_data FROM property_images WHERE property_id = ?";
+    public List<String> getImagesByPropertyId(int propertyId) {
+        List<String> images = new ArrayList<>();
+        String sql = "SELECT image_url FROM property_images WHERE property_id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, propertyId);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                images.add(rs.getBytes("image_data"));
+                images.add(rs.getString("image_url"));
             }
         } catch (SQLException e) {
             e.printStackTrace();

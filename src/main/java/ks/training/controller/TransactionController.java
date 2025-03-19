@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import ks.training.dao.PropertyDao;
 import ks.training.dto.HistoryViewDto;
 import ks.training.dto.TransactionDto;
 import ks.training.dto.TransactionResponseDto;
@@ -332,7 +333,8 @@ public class TransactionController extends HttpServlet {
         }
 
         Property property = propertyService.findPropertyById(propertyId);
-        List<byte[]> images = propertyService.getImagesByPropertyId(propertyId);
+        PropertyDao propertyDao = new PropertyDao();
+        List<String> images = propertyDao.getImagesByPropertyId(propertyId);
 
         customerActivityService.logCustomerActivity(user.getId(), propertyId);
 

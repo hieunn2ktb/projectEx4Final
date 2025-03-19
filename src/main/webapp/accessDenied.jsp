@@ -37,7 +37,7 @@
 <div class="container">
     <h2>⛔ Truy cập bị từ chối!</h2>
     <p>Bạn không có quyền truy cập vào trang này.</p>
-    <a href="index.jsp">Quay lại trang chủ</a>
+    <a href="home">Quay lại trang chủ</a>
 </div>
 </body>
 </html>

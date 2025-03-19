@@ -13,6 +13,7 @@ import ks.training.entity.User;
 import ks.training.service.CustomerActivityService;
 import ks.training.service.PropertyService;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -105,12 +106,12 @@ public class PropertyController extends HttpServlet {
             return;
         }
 
-        try {
-            if (!request.getContentType().toLowerCase().startsWith("multipart/")) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request không hỗ trợ multipart");
-                return;
-            }
+        if (!request.getContentType().toLowerCase().startsWith("multipart/")) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request không hỗ trợ multipart");
+            return;
+        }
 
+        try {
             String title = request.getParameter("title");
             String description = request.getParameter("description");
             String address = request.getParameter("address");
@@ -122,11 +123,10 @@ public class PropertyController extends HttpServlet {
             List<InputStream> imageStreams = new ArrayList<>();
 
             for (Part part : fileParts) {
-                if (part.getName().equals("images") && part.getSize() > 0) {
+                if ("images".equals(part.getName()) && part.getSize() > 0) {
                     imageStreams.add(part.getInputStream());
                 }
             }
-
 
             PropertyResponse propertyResponse = new PropertyResponse();
             propertyResponse.setTitle(title);
@@ -138,17 +138,20 @@ public class PropertyController extends HttpServlet {
             propertyResponse.setImageStreams(imageStreams);
             propertyResponse.setCreatedBy(user.getId());
 
-            boolean isSuccess = propertyService.addProperty(propertyResponse);
-            String msg = isSuccess ? "Thêm thành công bất động sản" : "Thêm thất bại";
+            String uploadRootPath = getServletContext().getRealPath("") + File.separator + "uploads";
+            int propertyId = propertyService.addProperty(propertyResponse, uploadRootPath);
+
+            String msg = (propertyId != -1) ? "Thêm thành công bất động sản" : "Thêm thất bại";
             request.setAttribute("msg", msg);
 
-            RequestDispatcher rd = getServletContext().getRequestDispatcher("/property/addProperty.jsp");
+            RequestDispatcher rd = request.getRequestDispatcher("/property/addProperty.jsp");
             rd.forward(request, resp);
         } catch (Exception e) {
             e.printStackTrace();
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi xử lý yêu cầu!");
         }
     }
+
 
     private void editProperty(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         HttpSession session = request.getSession(false);
@@ -161,17 +164,25 @@ public class PropertyController extends HttpServlet {
         int propertyId = Integer.parseInt(request.getParameter("propertyId"));
         PropertyDao propertyDao = new PropertyDao();
         Property property = propertyDao.findPropertyById(propertyId);
-        List<byte[]> images = propertyDao.getImagesByPropertyId(propertyId);
+        List<String> images = propertyDao.getImagesByPropertyId(propertyId);
 
         request.setAttribute("user", user);
         request.setAttribute("property", property);
         request.setAttribute("images", images);
         request.getRequestDispatcher("/property/editProperty.jsp").forward(request, response);
     }
-    private void updateProperty(HttpServletRequest request, HttpServletResponse resp) throws IOException {
+    private void updateProperty(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         try {
+            HttpSession session = request.getSession(false);
+            User user = (session != null) ? (User) session.getAttribute("User") : null;
+
+            if (user == null) {
+                response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+                return;
+            }
+
             if (!request.getContentType().toLowerCase().startsWith("multipart/")) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request không hỗ trợ multipart");
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request không hỗ trợ multipart");
                 return;
             }
 
@@ -180,8 +191,6 @@ public class PropertyController extends HttpServlet {
             String description = request.getParameter("description");
             String address = request.getParameter("address");
             String propertyType = request.getParameter("property_type");
-
-
             double price = Double.parseDouble(request.getParameter("price"));
             double acreage = Double.parseDouble(request.getParameter("acreage"));
 
@@ -204,16 +213,20 @@ public class PropertyController extends HttpServlet {
             propertyResponse.setAcreage(acreage);
             propertyResponse.setImageStreams(imageStreams);
 
-            boolean isSuccess = propertyService.updateProperty(propertyResponse);
-            String msg = isSuccess ? "Update thành công bất động sản" : "Update thất bại";
-            request.setAttribute("msg", msg);
+            String uploadRootPath = getServletContext().getRealPath("") + File.separator + "uploads";
+            propertyService.setUploadRootPath(uploadRootPath);
 
-            editProperty(request, resp);
+            boolean isSuccess = propertyService.updateProperty(propertyResponse);
+            String msg = isSuccess ? "Cập nhật thành công bất động sản" : "Cập nhật thất bại";
+
+            request.setAttribute("msg", msg);
+            editProperty(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi xử lý yêu cầu!");
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi xử lý yêu cầu!");
         }
     }
+
 
     private void getProperty(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         HttpSession session = request.getSession(false);
@@ -235,7 +248,8 @@ public class PropertyController extends HttpServlet {
         }
 
         Property property = propertyService.findPropertyById(propertyId);
-        List<byte[]> images = propertyService.getImagesByPropertyId(propertyId);
+        PropertyDao propertyDao = new PropertyDao();
+        List<String> images = propertyDao.getImagesByPropertyId(propertyId);
 
         customerActivityService.logCustomerActivity(user.getId(), propertyId);
 

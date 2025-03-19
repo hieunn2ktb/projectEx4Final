@@ -1,54 +1,51 @@
 package ks.training.controller;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ks.training.dao.PropertyDao;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
 
-@WebServlet("/ImageServlet")
+@WebServlet("/uploads/*")
 public class ImageServlet extends HttpServlet {
-    private final PropertyDao propertyDao = new PropertyDao();
+    private static final String UPLOAD_DIR = "C:\\Users\\Admin\\Desktop\\Hieu\\projectEx4Final\\target\\RealEstateManagement\\uploads";
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        try {
-            int propertyId = Integer.parseInt(request.getParameter("propertyId"));
-            int imageIndex = Integer.parseInt(request.getParameter("imageIndex"));
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Lấy đường dẫn ảnh từ URL
+        String imagePath = request.getPathInfo();
+        if (imagePath == null || imagePath.equals("/")) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
 
+        // Đường dẫn đầy đủ đến file ảnh
+        File imageFile = new File(UPLOAD_DIR, imagePath);
+        if (!imageFile.exists()) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
 
-            List<byte[]> images = propertyDao.getImagesByPropertyId(propertyId);
+        // Xác định kiểu MIME
+        String mimeType = getServletContext().getMimeType(imageFile.getName());
+        if (mimeType == null) {
+            mimeType = "application/octet-stream";
+        }
 
-            if (images.isEmpty()) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                return;
+        response.setContentType(mimeType);
+        response.setContentLength((int) imageFile.length());
+
+        // Gửi file về client
+        try (FileInputStream in = new FileInputStream(imageFile);
+             OutputStream out = response.getOutputStream()) {
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = in.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
             }
-
-            if (imageIndex < 0 || imageIndex >= images.size()) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
-            byte[] imageData = images.get(imageIndex);
-
-            response.setContentType("image/jpeg");
-            response.setContentLength(imageData.length);
-
-            try (OutputStream os = response.getOutputStream()) {
-                os.write(imageData);
-                os.flush();
-            }
-
-        } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -7,7 +7,7 @@
 <%
     Property property = (Property) request.getAttribute("property");
     int propertyId = property.getId();
-    List<byte[]> images = (List<byte[]>) request.getAttribute("images");
+    List<String> images = ( List<String>) request.getAttribute("images");
     User user = (User) request.getAttribute("user");
 %>
 <!DOCTYPE html>
@@ -61,10 +61,12 @@
             <% if (images != null && !images.isEmpty()) { %>
             <div id="propertyCarousel" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-inner">
-                    <% for (int i = 0; i < images.size(); i++) { %>
-                    <div class="carousel-item <%= i == 0 ? "active" : "" %>">
-                        <img src="<%= request.getContextPath() %>/ImageServlet?propertyId=<%= propertyId %>&imageIndex=<%= i %>"
-                             class="d-block w-75 mx-auto" alt="<%=property.getTitle()%>">
+                    <% for (int i = 0; i < images.size(); i++) {
+                        %>
+                    <div class="carousel-item <%= (i == 0) ? "active" : "" %>">
+                        <img src="<%= request.getContextPath() + "/" + images.get(i) %>"
+                             class="d-block w-75 mx-auto" alt="Property Image">
+
                     </div>
                     <% } %>
                 </div>
