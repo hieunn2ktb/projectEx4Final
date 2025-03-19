@@ -155,21 +155,30 @@
     </tbody>
   </table>
 
-  <div class="pagination">
-    <% if ((Integer) request.getAttribute("currentPage") > 1) { %>
-    <a href="?page=<%= (Integer) request.getAttribute("currentPage") - 1 %>&status=<%= status %>&buyerName=<%= buyerName %>&startDate=<%= startDate %>&endDate=<%= endDate %>">&laquo; Trước</a>
-    <% } %>
+  <div class="container mt-3">
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center">
+        <c:if test="${currentPage > 1}">
+          <li class="page-item">
+            <a class="page-link" href="transaction?action=allTransaction&page=${currentPage - 1}" aria-label="Previous">
+              <span aria-hidden="true">&laquo; Trang trước</span>
+            </a>
+          </li>
+        </c:if>
 
-    <% for (int i = 1; i <= (Integer) request.getAttribute("totalPages"); i++) { %>
-    <a href="?page=<%= i %>&status=<%= status %>&buyerName=<%= buyerName %>&startDate=<%= startDate %>&endDate=<%= endDate %>"
-       class="<%= i == (Integer) request.getAttribute("currentPage") ? "active" : "" %>">
-      <%= i %>
-    </a>
-    <% } %>
+        <li class="page-item disabled">
+          <span class="page-link">Trang ${currentPage} / ${totalPages}</span>
+        </li>
 
-    <% if ((Integer) request.getAttribute("currentPage") < (Integer) request.getAttribute("totalPages")) { %>
-    <a href="?page=<%= (Integer) request.getAttribute("currentPage") + 1 %>&status=<%= status %>&buyerName=<%= buyerName %>&startDate=<%= startDate %>&endDate=<%= endDate %>">Tiếp &raquo;</a>
-    <% } %>
+        <c:if test="${currentPage < totalPages}">
+          <li class="page-item">
+            <a class="page-link" href="transaction?action=allTransaction&page=${currentPage + 1}" aria-label="Next">
+              <span aria-hidden="true">Trang sau &raquo;</span>
+            </a>
+          </li>
+        </c:if>
+      </ul>
+    </nav>
   </div>
 
 </div>

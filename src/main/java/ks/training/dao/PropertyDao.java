@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class PropertyDao {
     private static final String UPLOAD_DIR = "uploads";
@@ -119,8 +120,11 @@ public class PropertyDao {
 
     public int addProperty(PropertyResponse property, String uploadRootPath) {
         int propertyId = -1;
-        String sql = "INSERT INTO properties (title, description, price, address, property_type, acreage, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO properties (title, description, price, address, property_type, acreage, created_by, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         String uploadImageSQL = "INSERT INTO property_images (property_id, image_url) VALUES (?, ?)";
+        String updateDefaultImageSQL = "UPDATE properties SET image_url = ? WHERE id = ?";
+
+        List<String> uploadedImages = new ArrayList<>();
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -131,6 +135,7 @@ public class PropertyDao {
             pstmt.setString(5, property.getPropertyType());
             pstmt.setDouble(6, property.getAcreage());
             pstmt.setInt(7, property.getCreatedBy());
+            pstmt.setNull(8, Types.VARCHAR);
 
             pstmt.executeUpdate();
 
@@ -146,9 +151,6 @@ public class PropertyDao {
 
         if (propertyId != -1 && property.getImageStreams() != null) {
             File uploadDir = new File(uploadRootPath);
-
-            System.out.println("Upload directory path: " + uploadDir.getAbsolutePath());
-
             if (!uploadDir.exists()) uploadDir.mkdirs();
 
             for (InputStream imageStream : property.getImageStreams()) {
@@ -165,10 +167,25 @@ public class PropertyDao {
                     e.printStackTrace();
                 }
 
+                String imageUrl = UPLOAD_DIR + "/" + fileName;
+                uploadedImages.add(imageUrl);
+
                 try (Connection conn = DatabaseConnection.getConnection();
                      PreparedStatement stmt = conn.prepareStatement(uploadImageSQL)) {
                     stmt.setInt(1, propertyId);
-                    stmt.setString(2, UPLOAD_DIR + "/" + fileName);
+                    stmt.setString(2, imageUrl);
+                    stmt.executeUpdate();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (!uploadedImages.isEmpty()) {
+                String defaultImage = uploadedImages.get(new Random().nextInt(uploadedImages.size()));
+                try (Connection conn = DatabaseConnection.getConnection();
+                     PreparedStatement stmt = conn.prepareStatement(updateDefaultImageSQL)) {
+                    stmt.setString(1, defaultImage);
+                    stmt.setInt(2, propertyId);
                     stmt.executeUpdate();
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -178,6 +195,7 @@ public class PropertyDao {
 
         return propertyId;
     }
+
 
     public boolean updateProperty(Connection conn, PropertyResponse property, String uploadRootPath) {
         String updatePropertySQL = "UPDATE properties SET title = ?, description = ?, price = ?, address = ?, property_type = ?, acreage = ? WHERE id = ?";

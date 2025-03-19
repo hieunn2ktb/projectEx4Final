@@ -205,7 +205,7 @@ public class TransactionController extends HttpServlet {
             resp.sendRedirect(request.getContextPath() + "/user/login.jsp");
             return;
         }
-        int recordsPerPage = 10;
+        int recordsPerPage = 5;
         int currentPage = 1;
         String status = request.getParameter("status");
         String buyerEmail = request.getParameter("email");

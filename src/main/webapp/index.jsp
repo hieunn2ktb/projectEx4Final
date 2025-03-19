@@ -271,8 +271,8 @@
     <div class="property-list">
         <div class="property">
             <div class="property-image">
-                <img src="<%= request.getContextPath() %>/ImageServlet?propertyId=<%= property.getId() %>&imageIndex=<%= 0 %>"
-                     class="d-block w-100" alt="<%=property.getTitle()%>">
+                <img src="<%= request.getContextPath() + "/" + property.getImageUrl() %>"
+                     class="d-block w-75 mx-auto" alt="Property Image">
             </div>
             <div class="property-info">
                 <h3><%= property.getTitle() %>
@@ -331,7 +331,7 @@
 
         <c:if test="${currentPage < totalPages}">
             <a href="${pageContext.request.contextPath}/home?page=${currentPage + 1}&minPrice=${minPrice}&maxPrice=${maxPrice}&searchAddress=${searchAddress}&searchPropertyType=${searchPropertyType}">
-                Tiếp &raquo;s
+                Tiếp &raquo;
             </a>
         </c:if>
     </div>
