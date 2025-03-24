@@ -8,6 +8,7 @@ import ks.training.utils.DatabaseConnection;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TransactionService {
@@ -72,5 +73,16 @@ public class TransactionService {
 
     public TransactionResponseDto getTransactionById(int id) {
         return transactionDAO.getTransactionById(id);
+    }
+    public List<TransactionResponseDto> getTransactionByUser(int id,int pageNumber, int pageSize) {
+        List<TransactionResponseDto> transactionResponseDto = new ArrayList<>();
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            transactionResponseDto = transactionDAO.getTransactionByUser(conn, id, pageNumber, pageSize);
+            conn.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return transactionResponseDto;
     }
 }

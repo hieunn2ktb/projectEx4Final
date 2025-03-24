@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import ks.training.dao.CustomerActivityDao;
 import ks.training.dto.PropertyDto;
 import ks.training.dto.UserDto;
+import ks.training.entity.Pagination;
 import ks.training.entity.User;
 import ks.training.service.CustomerActivityService;
 import ks.training.service.PropertyService;
@@ -258,7 +259,6 @@ public class UserController extends HttpServlet {
         return user;
     }
     private void showListUser(HttpServletRequest request, HttpServletResponse response){
-        int recordsPerPage = 5;
         int currentPage = 1;
 
         String pageParam = request.getParameter("page");
@@ -267,14 +267,12 @@ public class UserController extends HttpServlet {
             if (currentPage < 1) currentPage = 1;
         }
         int totalRecords = userService.countUsers();
-        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
-        if (totalPages == 0) totalPages = 1;
-        if (currentPage > totalPages) currentPage = totalPages;
+        Pagination pagination = new Pagination(currentPage, totalRecords);
 
-        List<UserDto> list = userService.listUser(currentPage,recordsPerPage);
+        List<UserDto> list = userService.listUser(currentPage,pagination.getRecordsPerPage());
         request.setAttribute("listUser",list);
         request.setAttribute("currentPage", currentPage);
-        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalPages", pagination.getTotalPages());
         RequestDispatcher rd = getServletContext().getRequestDispatcher("/user/listUserView.jsp");
         try {
             rd.forward(request, response);

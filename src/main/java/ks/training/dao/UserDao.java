@@ -29,13 +29,12 @@ public class UserDao {
     }
 
 
-    public void register(String email, String password, String fullName, String phone, String address) {
+    public void register(Connection conn, String email, String password, String fullName, String phone, String address) {
         String insertUserSQL = "INSERT INTO users(email, password, full_name, phone, address) VALUES (?, ?, ?, ?, ?)";
         String insertUserRoleSQL = "INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)";
         String getRoleIdSQL = "SELECT id FROM roles WHERE name = 'Customer'";
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmtUser = conn.prepareStatement(insertUserSQL, Statement.RETURN_GENERATED_KEYS);
+        try (PreparedStatement stmtUser = conn.prepareStatement(insertUserSQL, Statement.RETURN_GENERATED_KEYS);
              Statement stmtRole = conn.createStatement();
              ResultSet rs = stmtRole.executeQuery(getRoleIdSQL)) {
 
@@ -179,6 +178,7 @@ public class UserDao {
         }
         return user;
     }
+
     public List<UserDto> listUserByPage(int page, int recordsPerPage) {
         String sql = "SELECT u.id, u.full_name, u.email, u.phone, u.address, r.name " +
                 "FROM users u " +

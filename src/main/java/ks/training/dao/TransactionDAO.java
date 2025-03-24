@@ -218,4 +218,47 @@ public class TransactionDAO {
         }
         return transaction;
     }
+
+    public List<TransactionResponseDto> getTransactionByUser(Connection conn, int id, int pageNumber, int pageSize) {
+        String sql = "SELECT t.id AS transaction_id, \n" +
+                "       u.full_name AS buyer_name, \n" +
+                "       p.title AS property_title, \n" +
+                "       t.transaction_type, \n" +
+                "       t.status, \n" +
+                "       t.created_at, \n" +
+                "       p.id AS propertyId, \n" +
+                "       u.id AS userId\n" +
+                "FROM transactions t\n" +
+                "JOIN users u ON t.buyer_id = u.id\n" +
+                "JOIN properties p ON t.property_id = p.id\n" +
+                "WHERE t.buyer_id = ? AND t.transaction_type IN ('Mua', 'Đặt cọc')\n" +
+                "ORDER BY t.created_at DESC\n" +
+                "LIMIT ? OFFSET ?";
+        TransactionResponseDto transaction = null;
+        List<TransactionResponseDto> transactions = new ArrayList<>();
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            pstmt.setInt(2, pageSize);
+            int offset = (pageNumber - 1) * pageSize;
+            pstmt.setInt(3, offset);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                transaction = new TransactionResponseDto(
+                        rs.getInt("transaction_id"),
+                        rs.getString("buyer_name"),
+                        rs.getString("property_title"),
+                        rs.getString("transaction_type"),
+                        rs.getString("status"),
+                        rs.getTimestamp("created_at"),
+                        rs.getInt("propertyId"),
+                        rs.getInt("userId")
+                );
+                transactions.add(transaction);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return transactions;
+    }
 }

@@ -66,7 +66,6 @@
                     <div class="carousel-item <%= (i == 0) ? "active" : "" %>">
                         <img src="<%= request.getContextPath() + "/" + images.get(i) %>"
                              class="d-block w-75 mx-auto" alt="Property Image">
-
                     </div>
                     <% } %>
                 </div>

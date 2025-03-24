@@ -55,6 +55,9 @@ public class TransactionController extends HttpServlet {
             case "detailHistory":
                 detailHistory(req, resp);
                 break;
+            case "transactionDetail":
+                transactionDetail(req, resp);
+                break;
             default:
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Hành động không hợp lệ");
                 break;
@@ -344,5 +347,35 @@ public class TransactionController extends HttpServlet {
         request.setAttribute("transaction", transaction);
 
         request.getRequestDispatcher("/property/PropertyDetail.jsp").forward(request, response);
+    }
+    private void transactionDetail(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        HttpSession session = request.getSession(false);
+        User user = (session != null) ? (User) session.getAttribute("User") : null;
+
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/user/login.jsp");
+            return;
+        }
+
+        int recordsPerPage = 5;
+        int currentPage = 1;
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && pageParam.matches("\\d+")) {
+            currentPage = Integer.parseInt(pageParam);
+            if (currentPage < 1) currentPage = 1;
+        }
+        int totalRecords = customerActivityService.getTotalPages();
+        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+        if (totalPages == 0) totalPages = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+
+        List<TransactionResponseDto> transaction = transactionService.getTransactionByUser(user.getId(),currentPage,recordsPerPage);
+
+        request.setAttribute("transactions", transaction);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        request.getRequestDispatcher("/transaction/transactionsUser.jsp").forward(request, response);
+
     }
 }

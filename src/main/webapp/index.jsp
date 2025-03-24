@@ -222,7 +222,9 @@
             </a></li>
             <li><a href="user?action=logout" class="btn">Đăng xuất</a></li>
             <li><a href="user?action=editUser" class="btn">Thay đổi thông tin</a></li>
-            <% if ("Employee".equals(user.getRole())) { %>
+            <% if ("Customer".equals(user.getRole())) { %>
+            <li><a href="transaction?action=transactionDetail" class="btn">Thông tin giao dịch</a></li>
+            <%} if ("Employee".equals(user.getRole())) { %>
             <li><a href="propertyMng?action=viewAddProperty" class="btn">Thêm Bất Động Sản</a></li>
             <li><a href="transaction?action=allTransaction" class="btn">Quản lý giao dịch</a></li>
             <li><a href="report?action=reportCount" class="btn">Báo cáo giao dịch</a></li>

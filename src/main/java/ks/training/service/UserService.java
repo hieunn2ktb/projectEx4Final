@@ -23,7 +23,7 @@ public class UserService {
         try (Connection conn = DatabaseConnection.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                userDao.register(email,password,fullName,phone,address);
+                userDao.register(conn,email,password,fullName,phone,address);
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
